@@ -1,0 +1,28 @@
+{
+  "env": "dev",
+  "firestore_project": "cabinas-geologicas-dev",
+
+  "gas_peak_threshold_ppm": "8000",
+  "gas_sustained_threshold_ppm": "4000",
+  "gas_sustained_min_samples": "3",
+  "density_drop_threshold": "0.15",
+  "rop_drop_pct": "0.40",
+  "rop_window_min": "60",
+
+  "poll_interval_min": "5",
+  "poll_timeout_sec": "25",
+
+  "smtp": {
+    "host": "smtp.gmail.com",
+    "port": "587",
+    "user": "REEMPLAZA_CON_TU_CUENTA_GMAIL",
+    "pass": "REEMPLAZA_CON_APP_PASSWORD_16_CHARS",
+    "from_email": "alertas@tu-dominio.com"
+  },
+
+  "twilio": {
+    "account_sid": "REEMPLAZA_CON_SID_EMPIEZA_AC",
+    "auth_token": "REEMPLAZA_CON_TOKEN_32_CHARS",
+    "whatsapp_from": "whatsapp:+14155238886"
+  }
+}

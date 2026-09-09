@@ -1,0 +1,59 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "datos_realtime",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cabin_id",  "order": "ASCENDING"  },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "datos_realtime",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "manifestaciones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "severidad", "order": "ASCENDING"  },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "manifestaciones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "tipo",      "order": "ASCENDING"  },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "manifestaciones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "estado",    "order": "ASCENDING"  },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cabins",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",     "order": "ASCENDING"  },
+        { "fieldPath": "updated_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "contactos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cabinas", "arrayConfig": "CONTAINS" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

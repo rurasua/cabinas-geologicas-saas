@@ -1,0 +1,85 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────────
+// firestore.rules — Seguridad SaaS Cabinas Geológicas
+//
+// Modelo de datos (ver firestore_schema.py y main.py):
+//   cabins/{id}                                  metadata + witsml_config
+//   cabins/{id}/datos_realtime/{auto-id}         lecturas crudas (server-write only)
+//   cabins/{id}/manifestaciones/{auto-id}        alertas (server-create only)
+//   cabins/{id}/reglas/{id}                      umbrales por cabina
+//   contactos/{id}                                a quién notificar
+//   reglas/{cabin_id}                            umbrales globales por cabina
+//   _secrets/{id}                                NUNCA legibles desde cliente
+//
+// Reglas:
+// 1. Default: deny all
+// 2. Subcollecciones datos_realtime y manifestaciones: solo server escribe
+// 3. Contactos y reglas: solo usuarios autenticados
+// 4. Cabins: lectura autenticada; escritura solo admin o el dueño
+// 5. _secrets: deny all desde cliente
+// ─────────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuth() && request.auth.token.admin == true;
+    }
+
+    // ── Cabins: metadata + witsml_config ──
+    match /cabins/{cabinId} {
+      allow read: if isAuth();
+      allow create, update: if isAdmin() ||
+        (isAuth() && request.auth.token.company_id == request.resource.data.company_id);
+      allow delete: if isAdmin();
+
+      // Subcollecciones de la cabina
+      match /datos_realtime/{readingId} {
+        allow read: if isAuth();
+        allow write: if false;  // SOLO Cloud Functions
+      }
+      match /manifestaciones/{manifestId} {
+        allow read: if isAuth();
+        // Cliente puede marcar acknowledged (y solo ese campo)
+        allow update: if isAuth() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['estado', 'vista_por', 'vista_at', 'notas_cierre']);
+        allow create, delete: if false;  // SOLO Cloud Functions
+      }
+      match /reglas/{reglaId} {
+        allow read, write: if isAuth();
+      }
+    }
+
+    // ── Contactos ──
+    match /contactos/{contactId} {
+      allow read, write: if isAuth();
+    }
+
+    // ── Reglas globales por cabina (opcional) ──
+    match /reglas/{cabinId} {
+      allow read: if isAuth();
+      allow write: if isAdmin();
+    }
+
+    // ── Secretos: NUNCA desde cliente ──
+    match /_secrets/{secretId} {
+      allow read, write: if false;
+    }
+
+    // ── Usuarios: perfil propio ──
+    match /usuarios/{userId} {
+      allow read: if isAuth() && (isAdmin() || request.auth.uid == userId);
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isAuth() && request.auth.uid == userId &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['name', 'phone', 'channel_pref', 'last_seen']);
+      allow delete: if isAdmin();
+    }
+  }
+}

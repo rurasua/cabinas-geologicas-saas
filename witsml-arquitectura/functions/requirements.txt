@@ -1,0 +1,10 @@
+# Pinned versions — tested on Python 3.11 (Cloud Functions 2nd gen default)
+firebase-admin==6.5.0
+firebase-functions==0.4.2
+requests==2.32.3
+google-cloud-firestore==2.19.0
+google-cloud-secret-manager==2.20.1
+twilio==9.3.7
+lxml==5.3.0          # parsing de XML WITSML
+python-dotenv==1.0.1 # solo para emulador local
+pytest==8.3.3       # tests

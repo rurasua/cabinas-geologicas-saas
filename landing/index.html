@@ -1,0 +1,2273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cabinas Geológicas — Panel de control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7f5f0;
+      --surface: #ffffff;
+      --line: #e9e3d6;
+      --line-soft: #f0ebde;
+      --ink: #14171e;
+      --ink-2: #3a4256;
+      --muted: #7c7a72;
+      --primary: #2f6f5e;
+      --primary-deep: #1d4a3d;
+      --primary-soft: rgba(47, 111, 94, 0.08);
+      --accent: #c97b3f;
+      --accent-soft: rgba(201, 123, 63, 0.08);
+      --warn: #b06367;
+      --warn-soft: rgba(176, 99, 103, 0.08);
+      --gold: #b08a3e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      font-size: 15px;
+    }
+    h1, h2, h3, h4 { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
+    .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    input, select, textarea { font-family: inherit; font-size: inherit; }
+
+    /* ===== LAYOUT ===== */
+    #app { display: flex; min-height: 100vh; }
+
+    /* ===== SIDEBAR ===== */
+    #sidebar {
+      width: 280px;
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 50;
+      transition: transform 0.3s;
+    }
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      color: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+    .logo-text { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--ink); }
+    .logo-text small { display: block; font-family: 'Outfit', sans-serif; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+
+    .logo-block { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+    .logo-img { width: 168px; height: auto; display: block; }
+    .logo-slogan { width: 138px; height: auto; display: block; opacity: 0.78; }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; overflow-y: auto; }
+    .nav-section { margin-bottom: 1.5rem; }
+    .nav-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 0.75rem; margin-bottom: 0.4rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      color: var(--ink-2);
+      font-size: 0.93rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .nav-item:hover { background: var(--bg); }
+    .nav-item.active { background: var(--primary-soft); color: var(--primary-deep); }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-sub { margin-left: 1.5rem; margin-top: 0.25rem; display: none; }
+    .nav-sub.open { display: block; }
+    .nav-sub-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--ink-2);
+      cursor: pointer;
+    }
+    .nav-sub-item:hover { background: var(--bg); }
+    .nav-sub-item.active { color: var(--primary); font-weight: 600; }
+    .nav-sub-item::before { content: "·"; color: var(--muted); }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--line);
+      display: flex; align-items: center; gap: 0.7rem;
+    }
+    .user-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 0.85rem; font-weight: 500; color: var(--ink); }
+    .user-email { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ===== MAIN ===== */
+    #main { flex: 1; margin-left: 280px; min-width: 0; }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 20;
+    }
+    .menu-toggle { display: none; padding: 0.5rem; border-radius: 6px; }
+    .menu-toggle:hover { background: var(--bg); }
+    .breadcrumb { font-size: 0.9rem; color: var(--muted); }
+    .breadcrumb strong { color: var(--ink); font-weight: 500; }
+    .topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    .content { padding: 2rem; max-width: 1200px; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: var(--surface); }
+    .btn-primary:hover { background: var(--primary-deep); }
+    .btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--line); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-ghost { color: var(--ink-2); }
+    .btn-ghost:hover { background: var(--bg); }
+    .btn-danger { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+    .btn svg { width: 16px; height: 16px; }
+
+    /* ===== VIEW HEADER ===== */
+    .view-header { margin-bottom: 2rem; }
+    .view-title { font-size: 2rem; margin-bottom: 0.4rem; color: var(--ink); }
+    .view-subtitle { color: var(--muted); font-size: 1rem; }
+    .view-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap; }
+
+    /* ===== METRIC CARDS ===== */
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.2s;
+    }
+    .metric-card:hover { transform: translateY(-2px); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .metric-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .metric-value { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--ink); line-height: 1; }
+    .metric-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.4rem; }
+    .metric-trend { font-size: 0.75rem; color: var(--primary); margin-top: 0.4rem; }
+
+    /* ===== CARDS / SECTIONS ===== */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-card h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .section-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+
+    /* ===== STATUS BADGE ===== */
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-active { background: var(--primary-soft); color: var(--primary-deep); }
+    .badge-completed { background: var(--bg); color: var(--muted); }
+    .badge-manifestation { background: var(--warn-soft); color: var(--warn); }
+    .badge-pending { background: var(--accent-soft); color: var(--accent); }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* ===== CABIN LIST (Dashboard) ===== */
+    .cabin-list { display: grid; gap: 1rem; }
+    .cabin-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1.25rem;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cabin-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-color: var(--primary); }
+    .cabin-icon {
+      width: 56px; height: 56px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cabin-icon svg { width: 28px; height: 28px; }
+    .cabin-name { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin-bottom: 0.2rem; }
+    .cabin-meta { color: var(--muted); font-size: 0.85rem; }
+    .cabin-stats { display: flex; gap: 1.5rem; text-align: right; }
+    .cabin-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 500; color: var(--ink); }
+    .cabin-stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ===== TABS ===== */
+    .tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
+    .tab {
+      padding: 0.7rem 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab:hover { color: var(--ink); }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* ===== TABLES ===== */
+    .params-table { width: 100%; border-collapse: collapse; }
+    .params-table th { text-align: left; padding: 0.6rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; border-bottom: 1px solid var(--line); font-weight: 500; }
+    .params-table td { padding: 0.75rem; font-size: 0.9rem; border-bottom: 1px solid var(--line-soft); }
+    .params-table tr:last-child td { border-bottom: none; }
+    .params-table .num { font-family: 'JetBrains Mono', monospace; text-align: right; }
+    .params-table .label { color: var(--ink-2); }
+
+    /* ===== REPORT VIEW (SIOP) ===== */
+    .report-header {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .report-title { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .report-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .report-meta strong { color: var(--ink); font-weight: 500; }
+    .report-body { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 2rem; }
+    .report-section { margin-bottom: 2rem; }
+    .report-section:last-child { margin-bottom: 0; }
+    .report-section h4 { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.75rem; }
+    .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem 1.5rem; }
+    .report-grid-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px dashed var(--line-soft); }
+    .report-grid-item span:first-child { color: var(--ink-2); font-size: 0.9rem; }
+    .report-grid-item span:last-child { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--ink); }
+    .observations { background: var(--bg); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent); font-size: 0.92rem; color: var(--ink-2); }
+
+    /* ===== WIZARD ===== */
+    .wizard-stepper { display: flex; align-items: center; justify-content: center; margin-bottom: 2.5rem; }
+    .wizard-step { display: flex; align-items: center; gap: 0.6rem; }
+    .wizard-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); color: var(--muted); border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; flex-shrink: 0; }
+    .wizard-dot.active { background: var(--primary); color: var(--surface); border-color: var(--primary); }
+    .wizard-dot.done { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
+    .wizard-label { font-size: 0.85rem; color: var(--muted); font-weight: 500; }
+    .wizard-label.active, .wizard-label.done { color: var(--primary); }
+    .wizard-line { width: 60px; height: 2px; background: var(--line); margin: 0 1rem; }
+    .wizard-line.done { background: var(--primary); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem 1.5rem; }
+    .form-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-field.span-2 { grid-column: 1 / -1; }
+    .form-field label { font-size: 0.85rem; color: var(--ink-2); font-weight: 500; }
+    .form-field input, .form-field select, .form-field textarea { padding: 0.6rem 0.75rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 0.95rem; transition: all 0.15s; }
+    .form-field input::placeholder, .form-field textarea::placeholder { color: #c4c0b6; font-style: italic; opacity: 1; }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+    .form-field input:disabled { background: var(--bg); color: var(--muted); }
+    .form-field .help { font-size: 0.75rem; color: var(--muted); }
+    .checkbox-row { display: flex; gap: 1.5rem; margin-top: 0.4rem; }
+    .checkbox-row label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: var(--ink-2); }
+
+    .form-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding: 1.25rem 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+    .form-actions .right { display: flex; gap: 0.75rem; }
+
+    .summary-list { display: grid; gap: 0.25rem; }
+    .summary-item { display: flex; justify-content: space-between; padding: 0.55rem 0; border-bottom: 1px dashed var(--line-soft); }
+    .summary-item:last-child { border-bottom: none; }
+    .summary-item .label { color: var(--muted); font-size: 0.9rem; }
+    .summary-item .value { color: var(--ink); font-size: 0.95rem; font-weight: 500; text-align: right; }
+
+    /* ===== UPLOAD ===== */
+    .upload-zone {
+      background: var(--surface);
+      border: 2px dashed var(--line);
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: var(--primary-soft); }
+    .upload-zone svg { width: 48px; height: 48px; color: var(--muted); margin-bottom: 1rem; }
+    .upload-zone h3 { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .upload-zone p { color: var(--muted); font-size: 0.9rem; }
+    .upload-preview {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .upload-preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .preview-table { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; width: 100%; border-collapse: collapse; }
+    .preview-table th, .preview-table td { padding: 0.4rem 0.6rem; text-align: left; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+    .preview-table th { background: var(--bg); color: var(--muted); text-transform: uppercase; font-size: 0.7rem; }
+
+    /* ===== MANIFESTATION ===== */
+    .manifest-hero {
+      background: linear-gradient(135deg, var(--warn-soft) 0%, var(--surface) 100%);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .manifest-hero h2 { color: var(--warn); margin-bottom: 0.5rem; }
+    .manifest-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-top: 1.5rem; }
+    .manifest-stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+    .manifest-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: var(--ink); }
+
+    /* ===== LOGIN ===== */
+    .login-screen {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+      padding: 2rem;
+    }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    }
+    .login-logo { width: 64px; height: 64px; background: var(--primary); color: var(--accent); border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin-bottom: 1.5rem; }
+    .login-card h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .login-logos { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 1.8rem; }
+    .login-logo-img { width: 240px; height: auto; display: block; }
+    .login-logo-slogan { width: 200px; height: auto; display: block; opacity: 0.78; }
+    .login-card p { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; }
+    .btn-google {
+      width: 100%;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      transition: all 0.15s;
+    }
+    .btn-google:hover { background: var(--bg); border-color: var(--ink-2); }
+    .login-foot { margin-top: 1.5rem; font-size: 0.78rem; color: var(--muted); }
+
+    /* ===== TOAST ===== */
+    #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast {
+      background: var(--ink);
+      color: var(--surface);
+      padding: 0.85rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: flex; align-items: center; gap: 0.6rem;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      #sidebar { width: 240px; }
+      #main { margin-left: 240px; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #main { margin-left: 0; }
+      .menu-toggle { display: inline-flex; }
+      .content { padding: 1.25rem; }
+      .topbar { padding: 0.75rem 1.25rem; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+      .report-grid, .manifest-stats { grid-template-columns: 1fr; }
+      .cabin-card { grid-template-columns: 1fr; }
+      .cabin-stats { text-align: left; }
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== VISOR DE PARÁMETROS ===== */
+    .visor-controls {
+      display: flex; flex-direction: column; gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .visor-info { font-size: 0.92rem; color: var(--ink-2); }
+    .visor-info strong { color: var(--ink); font-family: 'DM Serif Display', serif; font-size: 1.05rem; }
+    .visor-info .mono { color: var(--muted); font-size: 0.85rem; }
+    .visor-legend { display: flex; gap: 1.5rem; flex-wrap: wrap; padding-top: 0.5rem; border-top: 1px solid var(--line-soft); }
+    .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--ink-2); }
+    .legend-line { display: inline-block; width: 18px; height: 3px; border-radius: 2px; }
+    .legend-dash { display: inline-block; width: 18px; height: 0; border-top: 1px dashed var(--muted); }
+    .legend-warn { display: inline-block; width: 18px; height: 0; border-top: 1px dashed var(--warn); }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.2s;
+    }
+    .chart-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-color: var(--primary); }
+    .chart-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; }
+    .chart-card-title { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.95rem; color: var(--ink); }
+    .chart-card-sub { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+    .chart-card-value { text-align: right; }
+    .chart-card-big { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: var(--ink); line-height: 1; }
+    .chart-card-mini { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-top: 0.2rem; }
+    .chart-card-svg { margin-top: 0.5rem; }
+    @media (max-width: 1024px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    /* ===== WIZARD PASO 4: UPLOAD DE ARCHIVOS ===== */
+    .upload-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .upload-item {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      gap: 1rem;
+      align-items: start;
+      padding: 1.25rem;
+      background: var(--bg);
+      border: 1px solid var(--line-soft);
+      border-radius: 10px;
+      transition: all 0.15s;
+    }
+    .upload-item:hover { border-color: var(--primary); background: var(--surface); }
+    .upload-item.loaded { border-left: 3px solid var(--primary); }
+    .upload-item-icon {
+      width: 48px; height: 48px;
+      background: var(--surface);
+      color: var(--primary);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .upload-item.loaded .upload-item-icon { background: var(--primary-soft); border-color: var(--primary); }
+    .upload-item-body { min-width: 0; }
+    .upload-item-head {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; flex-wrap: wrap;
+    }
+    .upload-item-head h4 { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.95rem; color: var(--ink); margin: 0; }
+    .upload-item-desc { font-size: 0.85rem; color: var(--ink-2); margin: 0 0 0.5rem; line-height: 1.5; }
+    .upload-item-genera {
+      font-size: 0.78rem; color: var(--muted);
+      background: var(--surface);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--line-soft);
+    }
+    .upload-item-genera strong { color: var(--primary); font-weight: 600; }
+    .upload-item-action { align-self: center; }
+
+    .file-status {
+      display: inline-flex; align-items: center;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.02em;
+    }
+    .file-status.loaded { background: var(--primary-soft); color: var(--primary-deep); }
+    .file-status.pending { background: var(--bg); color: var(--muted); }
+    .file-status.required { background: rgba(176,99,103,.1); color: var(--warn); }
+    .file-status.optional { background: var(--bg); color: var(--muted); }
+
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem 1.5rem;
+    }
+    .doc-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: var(--bg);
+    }
+    .doc-item.ok { background: var(--primary-soft); }
+    .doc-item.pending { color: var(--muted); }
+    .doc-check {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .doc-item.ok .doc-check { background: var(--primary); color: #fff; }
+    .doc-item.pending .doc-check { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+    .doc-item > span:nth-child(2) { flex: 1; }
+    .doc-tag {
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.1rem 0.45rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .doc-tag { background: rgba(176,99,103,.1); color: var(--warn); }
+    .doc-tag.optional { background: var(--bg); color: var(--muted); }
+
+    .visor-empty {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      color: var(--ink-2);
+    }
+    .visor-empty svg { color: var(--muted); margin-bottom: 1rem; opacity: 0.6; }
+    .visor-empty h3 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--ink); margin-bottom: 0.5rem; font-weight: 400; }
+    .visor-empty p { font-size: 0.95rem; max-width: 480px; margin: 0 auto 0.5rem; }
+    .visor-empty p.muted { color: var(--muted); font-size: 0.85rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line-soft); }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast-container"></div>
+  <script>
+    /* ======================== ICONOS LUCIDE INLINE ======================== */
+    const I = (path, size=18) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+    const ICONS = {
+      dashboard: I('<rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>'),
+      cabin: I('<path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/>'),
+      report: I('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>'),
+      alert: I('<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'),
+      settings: I('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+      chevron: I('<polyline points="6 9 12 15 18 9"/>', 16),
+      menu: I('<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>'),
+      upload: I('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
+      check: I('<polyline points="20 6 9 17 4 12"/>', 16),
+      download: I('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>', 16),
+      google: I('<path d="M22 12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>', 18),
+      arrowUp: I('<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>', 14),
+      logout: I('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>', 16),
+      fileText: I('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>', 18),
+    };
+
+    /* ======================== DATA MOCK ======================== */
+    const MOCK_USER = {
+      nombre: 'Gerente General',
+      email: 'gerencia@data-agenthinkos.com',
+      empresa: 'Data-AgenThinkOs',
+      plan: 'Piloto — 1 cabina',
+    };
+
+    const MOCK_CABINS = [
+      {
+        id: 'mulach-12', nombre: 'Kali-10', campo: 'Kali', empresa: 'Data-AgenThinkOs',
+        equipo: 'TUNDRA', operador: 'Grupo Insigna', etapa: '8.5"',
+        profundidad_total: 4162, inicio: '15/07/2022', fin: '28/07/2022',
+        dias_op: 13, formacion: 'Mioceno Superior', estado: 'active',
+        metros_hoy: 245, rop_prom: 86, gas_max: 10260, manif_count: 1,
+        witsml: {
+          estado: 'active',
+          url: 'https://192.168.10.50/witsml/store',
+          username: 'svc_agenthinkos',
+          namespace: 'eml://demo/Kali-10',
+          last_sync: 'hace 2 min',
+          next_poll: 'en 3 min',
+          poll_interval_min: 5,
+          total_readings: 348,
+        },
+      },
+      {
+        id: 'pokche-12', nombre: 'Tarim-12', campo: 'Tarim', empresa: 'Data-AgenThinkOs',
+        equipo: 'PAE IXTAL', operador: 'Grupo Insigna', etapa: 'Terminación',
+        profundidad_total: 6560, inicio: 'abril 2022', fin: null,
+        dias_op: 74, formacion: 'Jurásico Superior', estado: 'completed',
+        metros_hoy: 0, rop_prom: 0, gas_max: 0, manif_count: 0,
+        witsml: { estado: 'none' },
+      },
+    ];
+
+    const MOCK_REPORTS = [
+      { id: 'siop-2022-07-15', cabin: 'mulach-12', fecha: '15/07/2022', tipo: 'SIOP', prof_ini: 2500, prof_fin: 2745, metros: 245, rop: 86, status: 'completed' },
+      { id: 'siop-2022-07-16', cabin: 'mulach-12', fecha: '16/07/2022', tipo: 'SIOP', prof_ini: 2745, prof_fin: 2945, metros: 200, rop: 41, status: 'completed' },
+      { id: 'siop-2022-07-28', cabin: 'mulach-12', fecha: '28/07/2022', tipo: 'SIOP', prof_ini: 3839, prof_fin: 4162, metros: 323, rop: 95, status: 'completed' },
+    ];
+
+    const MOCK_MANIFEST = {
+      id: '2022-07-26', cabin: 'mulach-12', fecha: '26/07/2022',
+      profundidad: 3580, gas_lectura: 10260, gas_background: 145,
+      factor_pico: 70, formacion: 'Mioceno Superior',
+      tiempo_respuesta: 58, causa: 'Cambio litológico',
+    };
+
+    /* ======================== DATOS REALES MULACH-12 (BASE GENERAL + CROMATOGRAFIA) ======================== */
+    // Sub-muestreados a 1 punto cada 50m. Datos 2500-3330m son reales del CSV BASE GENERAL.
+    // Datos 3350-4150m son representativos consistentes con la etapa 8.5" para demo visual.
+    const PARAMS_MULACH = [
+      { prof: 2500, wob: 2.5, rpm: 48, spp: 2073, gpm: 698, denIn: 1.5, denOut: 1.5, tempIn: 43, tempOut: 55.55 },
+      { prof: 2550, wob: 8.7, rpm: 99, spp: 3311, gpm: 918, denIn: 1.5, denOut: 1.5, tempIn: 41.72, tempOut: 53.25 },
+      { prof: 2600, wob: 6.9, rpm: 110, spp: 3372, gpm: 913, denIn: 1.5, denOut: 1.5, tempIn: 42.24, tempOut: 53.02 },
+      { prof: 2650, wob: 9.1, rpm: 110, spp: 3447, gpm: 915, denIn: 1.5, denOut: 1.5, tempIn: 43.68, tempOut: 54.28 },
+      { prof: 2700, wob: 4.4, rpm: 120, spp: 3394, gpm: 926, denIn: 1.53, denOut: 1.53, tempIn: 43.59, tempOut: 54.4 },
+      { prof: 2750, wob: 3.9, rpm: 120, spp: 3372, gpm: 913, denIn: 1.53, denOut: 1.53, tempIn: 43.33, tempOut: 54.98 },
+      { prof: 2800, wob: 2.3, rpm: 150, spp: 3316, gpm: 898, denIn: 1.53, denOut: 1.53, tempIn: 43.85, tempOut: 54.69 },
+      { prof: 2850, wob: 3.9, rpm: 150, spp: 3457, gpm: 913, denIn: 1.53, denOut: 1.53, tempIn: 43.85, tempOut: 55.3 },
+      { prof: 2900, wob: 5.3, rpm: 150, spp: 3486, gpm: 910, denIn: 1.53, denOut: 1.53, tempIn: 43.68, tempOut: 54.98 },
+      { prof: 2950, wob: 3.78, rpm: 120, spp: 3431, gpm: 923, denIn: 1.54, denOut: 1.54, tempIn: 43.85, tempOut: 54.98 },
+      { prof: 3000, wob: 6.4575, rpm: 120, spp: 3475, gpm: 898, denIn: 1.54, denOut: 1.54, tempIn: 43.85, tempOut: 54.69 },
+      { prof: 3050, wob: 5.54, rpm: 120, spp: 3658, gpm: 898, denIn: 1.55, denOut: 1.55, tempIn: 43.85, tempOut: 54.98 },
+      { prof: 3100, wob: 4.5033, rpm: 150, spp: 3621, gpm: 898, denIn: 1.55, denOut: 1.55, tempIn: 43.85, tempOut: 54.69 },
+      { prof: 3150, wob: 3.045, rpm: 150, spp: 3994, gpm: 957, denIn: 1.55, denOut: 1.55, tempIn: 43.85, tempOut: 54.98 },
+      { prof: 3200, wob: 5.2, rpm: 150, spp: 3951, gpm: 958, denIn: 1.55, denOut: 1.55, tempIn: 43.85, tempOut: 54.69 },
+      { prof: 3250, wob: 6.28, rpm: 150, spp: 3966, gpm: 955, denIn: 1.55, denOut: 1.55, tempIn: 43.85, tempOut: 54.98 },
+      { prof: 3300, wob: 2.53, rpm: 59, spp: 437, gpm: 202, denIn: 1.55, denOut: 1.55, tempIn: 43.33, tempOut: 54.98 },
+      { prof: 3350, wob: 8.5, rpm: 140, spp: 3500, gpm: 950, denIn: 1.55, denOut: 1.55, tempIn: 44, tempOut: 55.5 },
+      { prof: 3400, wob: 9.2, rpm: 145, spp: 3550, gpm: 955, denIn: 1.55, denOut: 1.55, tempIn: 44.2, tempOut: 55.7 },
+      { prof: 3450, wob: 7.8, rpm: 135, spp: 3450, gpm: 940, denIn: 1.55, denOut: 1.55, tempIn: 44.5, tempOut: 55.9 },
+      { prof: 3500, wob: 6.5, rpm: 130, spp: 3300, gpm: 920, denIn: 1.55, denOut: 1.55, tempIn: 44.7, tempOut: 56 },
+      { prof: 3550, wob: 8, rpm: 140, spp: 3400, gpm: 945, denIn: 1.55, denOut: 1.55, tempIn: 45, tempOut: 56.2 },
+      { prof: 3600, wob: 9.5, rpm: 150, spp: 3500, gpm: 960, denIn: 1.55, denOut: 1.55, tempIn: 45.2, tempOut: 56.4 },
+      { prof: 3650, wob: 5.5, rpm: 120, spp: 3200, gpm: 900, denIn: 1.55, denOut: 1.55, tempIn: 45.5, tempOut: 56.5 },
+      { prof: 3700, wob: 7, rpm: 135, spp: 3300, gpm: 930, denIn: 1.55, denOut: 1.55, tempIn: 45.7, tempOut: 56.7 },
+      { prof: 3750, wob: 8.5, rpm: 145, spp: 3450, gpm: 950, denIn: 1.55, denOut: 1.55, tempIn: 46, tempOut: 56.8 },
+      { prof: 3800, wob: 6.8, rpm: 130, spp: 3250, gpm: 925, denIn: 1.55, denOut: 1.55, tempIn: 46.2, tempOut: 57 },
+      { prof: 3850, wob: 9, rpm: 150, spp: 3500, gpm: 955, denIn: 1.55, denOut: 1.55, tempIn: 46.5, tempOut: 57.2 },
+      { prof: 3900, wob: 7.5, rpm: 140, spp: 3350, gpm: 940, denIn: 1.55, denOut: 1.55, tempIn: 46.7, tempOut: 57.4 },
+      { prof: 3950, wob: 8.2, rpm: 145, spp: 3450, gpm: 950, denIn: 1.55, denOut: 1.55, tempIn: 47, tempOut: 57.6 },
+      { prof: 4000, wob: 6, rpm: 125, spp: 3200, gpm: 910, denIn: 1.55, denOut: 1.55, tempIn: 47.2, tempOut: 57.8 },
+      { prof: 4050, wob: 8.8, rpm: 150, spp: 3500, gpm: 960, denIn: 1.55, denOut: 1.55, tempIn: 47.5, tempOut: 58 },
+      { prof: 4100, wob: 7.3, rpm: 140, spp: 3350, gpm: 940, denIn: 1.55, denOut: 1.55, tempIn: 47.7, tempOut: 58.2 },
+      { prof: 4150, wob: 9.5, rpm: 150, spp: 3550, gpm: 965, denIn: 1.55, denOut: 1.55, tempIn: 48, tempOut: 58.5 },
+    ];
+
+    // Cromatografía: 2500-3300m del CSV real, 3350-4150m representativo, pico a 3580m = 10,260 ppm
+    const CROMA_MULACH = [
+      { prof: 2500, gas: 0, c1: 0, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2550, gas: 13, c1: 13, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2600, gas: 6, c1: 6, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2650, gas: 9, c1: 9, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2700, gas: 18, c1: 18, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2750, gas: 187, c1: 187, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2800, gas: 267, c1: 267, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2850, gas: 395, c1: 395, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2900, gas: 321, c1: 321, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 2950, gas: 180, c1: 180, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3000, gas: 290, c1: 290, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3050, gas: 346, c1: 346, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3100, gas: 530, c1: 530, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3150, gas: 527, c1: 527, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3200, gas: 556, c1: 556, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3250, gas: 494, c1: 494, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3300, gas: 740, c1: 740, c2: 0, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3276, gas: 1687, c1: 1600, c2: 70, c3: 12, ic4: 3, nc4: 1, ic5: 1, nc5: 0 },
+      { prof: 3278, gas: 1441, c1: 1380, c2: 50, c3: 8, ic4: 2, nc4: 1, ic5: 0, nc5: 0 },
+      { prof: 3280, gas: 1059, c1: 1010, c2: 40, c3: 6, ic4: 1, nc4: 1, ic5: 0, nc5: 0 },
+      { prof: 3350, gas: 180, c1: 178, c2: 2, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3400, gas: 220, c1: 215, c2: 4, c3: 1, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3450, gas: 350, c1: 340, c2: 8, c3: 2, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3500, gas: 180, c1: 178, c2: 2, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3550, gas: 145, c1: 143, c2: 2, c3: 0, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3580, gas: 10260, c1: 9850, c2: 350, c3: 50, ic4: 8, nc4: 4, ic5: 0, nc5: 0 },
+      { prof: 3600, gas: 450, c1: 440, c2: 8, c3: 2, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3650, gas: 220, c1: 215, c2: 4, c3: 1, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3700, gas: 180, c1: 175, c2: 4, c3: 1, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3750, gas: 250, c1: 240, c2: 8, c3: 2, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3800, gas: 310, c1: 295, c2: 12, c3: 3, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3850, gas: 180, c1: 175, c2: 4, c3: 1, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3900, gas: 220, c1: 210, c2: 8, c3: 2, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 3950, gas: 250, c1: 240, c2: 8, c3: 2, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 4000, gas: 180, c1: 175, c2: 4, c3: 1, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 4050, gas: 220, c1: 215, c2: 4, c3: 1, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 4100, gas: 250, c1: 240, c2: 8, c3: 2, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+      { prof: 4150, gas: 180, c1: 175, c2: 4, c3: 1, ic4: 0, nc4: 0, ic5: 0, nc5: 0 },
+    ];
+
+    /* ======================== UTILIDADES ======================== */
+    const fmt = (n, d=0) => Number(n).toLocaleString('es-MX', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const getCabin = (id) => MOCK_CABINS.find(c => c.id === id);
+    const getReport = (id) => MOCK_REPORTS.find(r => r.id === id);
+
+    const showToast = (msg) => {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = `${ICONS.check} <span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    };
+
+    const navigate = (hash) => { window.location.hash = hash; };
+
+    /* ======================== VISOR DE PARÁMETROS (SVG INLINE) ======================== */
+    // Genera una mini-gráfica SVG con eje Y de profundidad (invertido) y eje X del parámetro.
+    // opts: { field, label, unit, color, min, max, logScale, manifestProf }
+    const drawLineChart = (data, opts) => {
+      const W = 620, H = 220;
+      const padL = 56, padR = 24, padT = 14, padB = 36;
+      const innerW = W - padL - padR;
+      const innerH = H - padT - padB;
+      const profMin = 2500, profMax = 4162;
+
+      const valMin = opts.min;
+      const valMax = opts.max;
+      const useLog = opts.logScale && valMin > 0;
+
+      // Escala X (lineal o log)
+      const xScale = (v) => {
+        if (useLog) {
+          const lmin = Math.log10(valMin), lmax = Math.log10(valMax);
+          return padL + (Math.log10(Math.max(v, valMin)) - lmin) / (lmax - lmin) * innerW;
+        }
+        return padL + (v - valMin) / (valMax - valMin) * innerW;
+      };
+      // Escala Y invertida (0 = superficie, 4162 = fondo)
+      const yScale = (p) => padT + (profMax - p) / (profMax - profMin) * innerH;
+
+      // Construir path
+      const pts = data.filter(d => d[opts.field] != null && d[opts.field] !== undefined);
+      const path = pts.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(d[opts.field]).toFixed(1)} ${yScale(d.prof).toFixed(1)}`).join(' ');
+
+      // Marcar pico (manifestación) si aplica
+      let manifestMark = '';
+      if (opts.manifestProf) {
+        const yM = yScale(opts.manifestProf);
+        manifestMark = `<line x1="${padL}" y1="${yM.toFixed(1)}" x2="${(W - padR).toFixed(1)}" y2="${yM.toFixed(1)}" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+          <text x="${(W - padR - 4).toFixed(1)}" y="${(yM - 4).toFixed(1)}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="var(--warn)">⚠ ${opts.manifestProf} m</text>`;
+      }
+
+      // Marcar promedio
+      const avg = pts.reduce((s, d) => s + d[opts.field], 0) / pts.length;
+      const xAvg = xScale(avg);
+      const avgMark = `<line x1="${xAvg.toFixed(1)}" y1="${padT}" x2="${xAvg.toFixed(1)}" y2="${(H - padB).toFixed(1)}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2,4" opacity="0.4"/>`;
+
+      // Marcar puntos individuales
+      const dots = pts.map(d => `<circle cx="${xScale(d[opts.field]).toFixed(1)}" cy="${yScale(d.prof).toFixed(1)}" r="2" fill="${opts.color}" opacity="0.7"/>`).join('');
+
+      // Etiquetas eje Y (profundidad) - cada 500m
+      const yLabels = [];
+      for (let p = 2500; p <= 4162; p += 500) {
+        yLabels.push(`<text x="${padL - 8}" y="${(yScale(p) + 3).toFixed(1)}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="var(--muted)">${p.toLocaleString('es-MX')}</text>
+          <line x1="${padL - 3}" y1="${yScale(p).toFixed(1)}" x2="${padL}" y2="${yScale(p).toFixed(1)}" stroke="var(--muted)" opacity="0.4"/>`);
+      }
+
+      // Etiquetas eje X (valor) - 5 marcas
+      const xLabels = [];
+      const xStep = (valMax - valMin) / 4;
+      for (let i = 0; i <= 4; i++) {
+        const v = valMin + xStep * i;
+        const x = xScale(v);
+        const label = useLog
+          ? (v >= 1000 ? `${(v/1000).toFixed(1)}k` : `${v}`)
+          : (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1));
+        xLabels.push(`<text x="${x.toFixed(1)}" y="${(H - padB + 16).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--muted)">${label}</text>
+          <line x1="${x.toFixed(1)}" y1="${(H - padB).toFixed(1)}" x2="${x.toFixed(1)}" y2="${(H - padB + 3).toFixed(1)}" stroke="var(--muted)" opacity="0.4"/>`);
+      }
+
+      // Líneas de grid horizontales
+      const gridLines = [];
+      for (let p = 2500; p <= 4162; p += 500) {
+        gridLines.push(`<line x1="${padL}" y1="${yScale(p).toFixed(1)}" x2="${(W - padR).toFixed(1)}" y2="${yScale(p).toFixed(1)}" stroke="var(--line-soft)" stroke-width="1"/>`);
+      }
+
+      // Bordes del área de gráfica
+      const frame = `<rect x="${padL}" y="${padT}" width="${innerW}" height="${innerH}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+
+      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:'Outfit',sans-serif">
+        ${gridLines.join('')}
+        ${frame}
+        ${avgMark}
+        ${path ? `<path d="${path}" fill="none" stroke="${opts.color}" stroke-width="1.5" stroke-linejoin="round"/>` : ''}
+        ${dots}
+        ${manifestMark}
+        ${xLabels.join('')}
+        ${yLabels.join('')}
+        <text x="${padL}" y="${(H - 6).toFixed(1)}" font-size="9" fill="var(--muted)">${opts.label} (${opts.unit})</text>
+        <text x="${(W - padR).toFixed(1)}" y="${(H - 6).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--muted)">Promedio: ${useLog ? avg.toFixed(0) : (avg % 1 === 0 ? avg.toFixed(0) : avg.toFixed(2))}</text>
+      </svg>`;
+    };
+
+    // Card individual de gráfica con título, métricas y SVG
+    const chartCard = (title, subtitle, value, sub, svg) => `
+      <div class="chart-card">
+        <div class="chart-card-head">
+          <div>
+            <div class="chart-card-title">${title}</div>
+            <div class="chart-card-sub">${subtitle}</div>
+          </div>
+          <div class="chart-card-value">
+            <div class="chart-card-big">${value}</div>
+            <div class="chart-card-mini">${sub}</div>
+          </div>
+        </div>
+        <div class="chart-card-svg">${svg}</div>
+      </div>`;
+
+    /* ======================== VISTA: VISOR DE PARÁMETROS ======================== */
+    // Mapeo de cabina -> dataset. Solo Kali-10 tiene datos de momento.
+    // Para otras cabinas se muestra empty state.
+    const VISOR_DATA = {
+      'mulach-12': { params: PARAMS_MULACH, croma: CROMA_MULACH, label: 'Kali-10', etapa: '12.25" → 8.5"' },
+      'pokche-12': null,
+    };
+
+    const renderVisor = (cabinId) => {
+      const dataset = VISOR_DATA[cabinId];
+      if (!dataset) {
+        return `
+          <div class="visor-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <path d="M3 9h18M9 3v18"/>
+            </svg>
+            <h3>Sin datos de parámetros</h3>
+            <p>Esta cabina aún no tiene series de tiempo de parámetros o cromatografía cargadas.</p>
+            <p class="muted">Los datos disponibles son únicamente de <strong>Kali-10</strong> (CSV BASE GENERAL y TABLA CROMATOGRAFIA del proyecto).</p>
+          </div>`;
+      }
+
+      const { params, croma, label, etapa } = dataset;
+      // Calcular promedios
+      const avg = (arr, key) => arr.reduce((s, d) => s + d[key], 0) / arr.length;
+      const min = (arr, key) => Math.min(...arr.map(d => d[key]));
+      const max = (arr, key) => Math.max(...arr.map(d => d[key]));
+
+      const charts = [
+        {
+          field: 'wob', label: 'WOB (Peso sobre barrena)', unit: 'ton', color: 'var(--primary)',
+          min: 0, max: 12, manifestProf: null,
+          avgVal: avg(params, 'wob'), minVal: min(params, 'wob'), maxVal: max(params, 'wob'),
+        },
+        {
+          field: 'rpm', label: 'RPM', unit: 'rpm', color: 'var(--primary)',
+          min: 0, max: 160, manifestProf: null,
+          avgVal: avg(params, 'rpm'), minVal: min(params, 'rpm'), maxVal: max(params, 'rpm'),
+        },
+        {
+          field: 'spp', label: 'Presión de bomba (SPP)', unit: 'psi', color: 'var(--primary)',
+          min: 0, max: 4200, manifestProf: null,
+          avgVal: avg(params, 'spp'), minVal: min(params, 'spp'), maxVal: max(params, 'spp'),
+        },
+        {
+          field: 'gpm', label: 'Gasto (GPM)', unit: 'gpm', color: 'var(--primary)',
+          min: 0, max: 1000, manifestProf: null,
+          avgVal: avg(params, 'gpm'), minVal: min(params, 'gpm'), maxVal: max(params, 'gpm'),
+        },
+        {
+          field: 'denIn', label: 'Densidad lodo entrada', unit: 'g/cm³', color: 'var(--accent)',
+          min: 1.45, max: 1.60, manifestProf: null,
+          avgVal: avg(params, 'denIn'), minVal: min(params, 'denIn'), maxVal: max(params, 'denIn'),
+        },
+        {
+          field: 'denOut', label: 'Densidad lodo salida', unit: 'g/cm³', color: 'var(--accent)',
+          min: 1.45, max: 1.60, manifestProf: null,
+          avgVal: avg(params, 'denOut'), minVal: min(params, 'denOut'), maxVal: max(params, 'denOut'),
+        },
+        {
+          field: 'tempIn', label: 'Temperatura entrada', unit: '°C', color: 'var(--gold)',
+          min: 38, max: 50, manifestProf: null,
+          avgVal: avg(params, 'tempIn'), minVal: min(params, 'tempIn'), maxVal: max(params, 'tempIn'),
+        },
+        {
+          field: 'tempOut', label: 'Temperatura salida', unit: '°C', color: 'var(--gold)',
+          min: 50, max: 60, manifestProf: null,
+          avgVal: avg(params, 'tempOut'), minVal: min(params, 'tempOut'), maxVal: max(params, 'tempOut'),
+        },
+        {
+          field: 'gas', label: 'Gas total (C1+)', unit: 'ppm', color: 'var(--warn)',
+          min: 0, max: 11000, manifestProf: 3580, logScale: true,
+          avgVal: avg(croma, 'gas'), minVal: min(croma, 'gas'), maxVal: max(croma, 'gas'),
+        },
+      ];
+
+      return `
+        <div class="visor-controls">
+          <div class="visor-info">
+            <strong>${label}</strong> · Etapa ${etapa} (2500-4162 m MD) ·
+            <span class="mono">${params.length} puntos de parámetros · ${croma.length} puntos de cromatografía</span>
+          </div>
+          <div class="visor-legend">
+            <span class="legend-item"><span class="legend-line" style="background:var(--primary)"></span>Parámetros</span>
+            <span class="legend-item"><span class="legend-line" style="background:var(--accent)"></span>Densidad</span>
+            <span class="legend-item"><span class="legend-line" style="background:var(--gold)"></span>Temperatura</span>
+            <span class="legend-item"><span class="legend-line" style="background:var(--warn)"></span>Gas</span>
+            <span class="legend-item"><span class="legend-dash"></span>Promedio</span>
+            <span class="legend-item"><span class="legend-warn"></span>Manifestación</span>
+          </div>
+        </div>
+        <div class="charts-grid">
+          ${charts.map(c => chartCard(
+            c.label,
+            `${c.unit} · Eje Y: profundidad (m MD)`,
+            `${(c.avgVal % 1 === 0 ? c.avgVal.toFixed(0) : c.avgVal.toFixed(2))}`,
+            `min ${(c.minVal % 1 === 0 ? c.minVal.toFixed(0) : c.minVal.toFixed(2))} · max ${(c.maxVal % 1 === 0 ? c.maxVal.toFixed(0) : c.maxVal.toFixed(2))}`,
+            drawLineChart(c.field === 'gas' ? croma : params, c)
+          )).join('')}
+        </div>`;
+    };
+
+    /* ======================== COMPONENTES ======================== */
+    const metricCard = (label, value, sub, trend) => `
+      <div class="metric-card">
+        <div class="metric-label">${label}</div>
+        <div class="metric-value mono">${value}</div>
+        ${sub ? `<div class="metric-sub">${sub}</div>` : ''}
+        ${trend ? `<div class="metric-trend">${trend}</div>` : ''}
+      </div>`;
+
+    const badge = (status) => {
+      const map = {
+        active: ['badge-active', 'Activa'],
+        completed: ['badge-completed', 'Cerrada'],
+        manifestation: ['badge-manifestation', 'Manifestación'],
+        pending: ['badge-pending', 'Pendiente'],
+      };
+      const [cls, label] = map[status] || map.pending;
+      return `<span class="badge ${cls}"><span class="badge-dot"></span>${label}</span>`;
+    };
+
+    const navItem = (icon, label, hash, active=false) => `
+      <div class="nav-item ${active ? 'active' : ''}" onclick="navigate('${hash}')">
+        ${icon} <span>${label}</span>
+      </div>`;
+
+    const cabinSubItem = (cabin, active=false) => `
+      <div class="nav-sub-item ${active ? 'active' : ''}" onclick="navigate('#/cabin/${cabin.id}')">${cabin.nombre}</div>`;
+
+    /* ======================== SIDEBAR ======================== */
+    const renderSidebar = (activeRoute) => {
+      const cabinsOpen = activeRoute.startsWith('cabin');
+      return `
+        <aside id="sidebar">
+          <div class="sidebar-header">
+            <div class="logo-block">
+              <img class="logo-img" src="logo.svg" alt="Xabim Alvarez &amp; Asociados" />
+              <img class="logo-slogan" src="slogan.svg" alt="The New Generation · Mining &amp; Geology" />
+            </div>
+          </div>
+          <nav class="sidebar-nav">
+            <div class="nav-section">
+              <div class="nav-label">Principal</div>
+              ${navItem(ICONS.dashboard, 'Dashboard', '#/dashboard', activeRoute === 'dashboard')}
+              <div class="nav-item" onclick="document.getElementById('cabins-sub').classList.toggle('open')">
+                ${ICONS.cabin} <span>Cabinas</span>
+                <span style="margin-left:auto">${ICONS.chevron}</span>
+              </div>
+              <div id="cabins-sub" class="nav-sub ${cabinsOpen ? 'open' : ''}">
+                ${MOCK_CABINS.map(c => cabinSubItem(c, activeRoute === 'cabin' && location.hash.includes(c.id))).join('')}
+              </div>
+            </div>
+            <div class="nav-section">
+              <div class="nav-label">Reportes</div>
+              ${navItem(ICONS.report, 'Reportes', '#/dashboard', false)}
+              ${navItem(ICONS.alert, 'Manifestaciones', '#/manifestation/2022-07-26', activeRoute === 'manifestation')}
+            </div>
+            <div class="nav-section">
+              <div class="nav-label">Sistema</div>
+              ${navItem(ICONS.settings, 'Configuración', '#/settings', activeRoute === 'settings')}
+            </div>
+          </nav>
+          <div class="sidebar-footer">
+            <div class="user-avatar">GG</div>
+            <div class="user-info">
+              <div class="user-name">${MOCK_USER.nombre}</div>
+              <div class="user-email">${MOCK_USER.email}</div>
+            </div>
+          </div>
+        </aside>`;
+    };
+
+    const renderTopbar = (breadcrumb) => `
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">${ICONS.menu}</button>
+          <div class="breadcrumb">${breadcrumb}</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" onclick="navigate('#/login')">${ICONS.logout}<span>Salir</span></button>
+        </div>
+      </div>`;
+
+    /* ======================== VISTAS ======================== */
+    const renderLogin = () => `
+      <div class="login-screen">
+        <div class="login-card">
+          <div class="login-logos">
+            <img class="login-logo-img" src="logo.svg" alt="Xabim Alvarez &amp; Asociados" />
+            <img class="login-logo-slogan" src="slogan.svg" alt="The New Generation · Mining &amp; Geology" />
+          </div>
+          <p>Panel de control para automatización de reportes geológicos</p>
+          <button class="btn-google" onclick="navigate('#/dashboard')">
+            ${ICONS.google} Entrar con Google
+          </button>
+          <div class="login-foot">Acceso demo · No se requiere contraseña</div>
+        </div>
+      </div>`;
+
+    const renderDashboard = () => {
+      const activas = MOCK_CABINS.filter(c => c.estado === 'active').length;
+      const reportes = MOCK_REPORTS.length;
+      const manif = MOCK_CABINS.reduce((s, c) => s + c.manif_count, 0);
+      const gasMax = Math.max(...MOCK_CABINS.map(c => c.gas_max));
+      return `
+        ${renderTopbar('<strong>Dashboard</strong>')}
+        <div class="content">
+          <div class="view-header">
+            <h1 class="view-title">Buenos días, ${MOCK_USER.nombre.split(' ')[0]}</h1>
+            <p class="view-subtitle">Resumen operativo de ${MOCK_USER.empresa} — ${new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+          </div>
+          <div class="metrics-grid">
+            ${metricCard('Cabinas activas', activas, `${MOCK_CABINS.length} totales`)}
+            ${metricCard('Reportes del mes', reportes, '12 últimos 30 días')}
+            ${metricCard('Manifestaciones', manif, 'Detectadas en 2022')}
+            ${metricCard('Gas máximo', fmt(gasMax) + ' ppm', 'Kali-10 / 26 jul', '+70× background')}
+          </div>
+
+          <div class="section-card">
+            <div class="section-card-header">
+              <h3>Cabinas</h3>
+              <div style="display:flex;gap:0.5rem">
+                <button class="btn btn-primary" onclick="navigate('#/cabin/new')">+ Nueva cabina</button>
+                <button class="btn btn-secondary">${ICONS.upload}<span>Subir CSV</span></button>
+              </div>
+            </div>
+            <div class="cabin-list">
+              ${MOCK_CABINS.map(c => `
+                <div class="cabin-card" onclick="navigate('#/cabin/${c.id}')">
+                  <div class="cabin-icon">${ICONS.cabin}</div>
+                  <div>
+                    <div class="cabin-name">${c.nombre}</div>
+                    <div class="cabin-meta">${c.equipo} · ${c.operador} · ${c.formacion}</div>
+                    <div style="margin-top:0.5rem">${badge(c.estado)}</div>
+                  </div>
+                  <div class="cabin-stats">
+                    <div><div class="cabin-stat-value mono">${fmt(c.profundidad_total)}</div><div class="cabin-stat-label">Prof m</div></div>
+                    <div><div class="cabin-stat-value mono">${c.rop_prom || '—'}</div><div class="cabin-stat-label">ROP m/h</div></div>
+                    <div><div class="cabin-stat-value mono">${fmt(c.gas_max)}</div><div class="cabin-stat-label">Gas ppm</div></div>
+                  </div>
+                </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-card-header"><h3>Reportes recientes</h3></div>
+            <table class="params-table">
+              <thead><tr><th>Fecha</th><th>Pozo</th><th>Tipo</th><th class="num">Prof. inicial</th><th class="num">Prof. final</th><th class="num">Metros</th><th class="num">ROP</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                ${MOCK_REPORTS.map(r => `
+                  <tr>
+                    <td class="mono">${r.fecha}</td>
+                    <td>${getCabin(r.cabin).nombre}</td>
+                    <td>${r.tipo}</td>
+                    <td class="num">${fmt(r.prof_ini)}</td>
+                    <td class="num">${fmt(r.prof_fin)}</td>
+                    <td class="num">${fmt(r.metros)}</td>
+                    <td class="num">${r.rop}</td>
+                    <td>${badge(r.status)}</td>
+                    <td><button class="btn btn-ghost" onclick="navigate('#/report/${r.id}')">Ver →</button></td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+    };
+
+    // ============================================================
+    // WITSML config (tab Config de cabina)
+    // Estados: 'none' | 'active' | 'paused' | 'pending'
+    // ============================================================
+    let witsmlEditMode = null;  // null = vista, cabinId = editando
+
+    const renderWitsmlConfig = (cabin) => {
+      const w = cabin.witsml || { estado: 'none' };
+      const estado = w.estado;
+      const isEditing = witsmlEditMode === cabin.id;
+      const isFormMode = estado === 'none' || isEditing;
+
+      if (isFormMode) {
+        const editingExisting = isEditing && estado !== 'none';
+        return `
+          <div class="section-card">
+            <h3>Fuente de datos en tiempo real (WITSML)</h3>
+            <p class="view-subtitle" style="margin-bottom:1.2rem">
+              Conecta esta cabina directamente al servidor WITSML Store para que el sistema jale lecturas cada 5 minutos sin subir CSVs manualmente. ${editingExisting ? '<span class="badge badge-pending"><span class="badge-dot"></span>Editando</span>' : '<span class="badge badge-completed"><span class="badge-dot"></span>No configurado</span>'}
+            </p>
+            <div class="form-grid">
+              <div class="form-field span-2">
+                <label>URL del WITSML Store *</label>
+                <input type="text" id="witsml-url-${cabin.id}" placeholder="https://192.168.10.50/witsml/store" value="${w.url || ''}" />
+                <span class="help">URL del servidor WITSML dentro de la red de la cabina. No requiere exposición a internet.</span>
+              </div>
+              <div class="form-field">
+                <label>Usuario *</label>
+                <input type="text" id="witsml-user-${cabin.id}" placeholder="svc_cabin01" value="${w.username || ''}" />
+                <span class="help">Cuenta con permisos de lectura.</span>
+              </div>
+              <div class="form-field">
+                <label>Contraseña *</label>
+                <input type="password" id="witsml-pass-${cabin.id}" placeholder="${editingExisting ? '(sin cambios)' : '••••••••'}" value="" />
+                <span class="help">Se guarda encriptada. No se muestra después.</span>
+              </div>
+              <div class="form-field span-2">
+                <label>Namespace EML *</label>
+                <input type="text" id="witsml-ns-${cabin.id}" placeholder="eml://demo/Kali-10" value="${w.namespace || ''}" />
+                <span class="help">Identificador único del pozo en el servidor WITSML.</span>
+              </div>
+            </div>
+            <div style="margin-top:1.2rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-secondary" onclick="witsmlTest('${cabin.id}')">${ICONS.check}<span>Probar conexión</span></button>
+              <button class="btn btn-primary" onclick="witsmlSave('${cabin.id}')">${editingExisting ? 'Guardar cambios' : 'Activar WITSML'}</button>
+              ${editingExisting ? `<button class="btn btn-ghost" onclick="witsmlCancelEdit()">Cancelar</button>` : ''}
+            </div>
+            <div id="witsml-msg-${cabin.id}" style="margin-top:1rem"></div>
+          </div>`;
+      }
+
+      // Modo vista: según estado
+      const badge = estado === 'active'
+        ? '<span class="badge badge-active"><span class="badge-dot"></span>Conectado</span>'
+        : estado === 'paused'
+        ? '<span class="badge badge-pending"><span class="badge-dot"></span>Pausado</span>'
+        : '<span class="badge badge-pending"><span class="badge-dot"></span>Pendiente de probar</span>';
+
+      const accionPrincipal = estado === 'active'
+        ? `<button class="btn btn-secondary" onclick="witsmlTogglePause('${cabin.id}')">Pausar</button>`
+        : `<button class="btn btn-primary" onclick="witsmlActivate('${cabin.id}')">${estado === 'pending' ? 'Probar y activar' : 'Reactivar'}</button>`;
+
+      return `
+        <div class="section-card">
+          <h3>Fuente de datos en tiempo real (WITSML) ${badge}</h3>
+          <table class="params-table" style="margin-top:1rem">
+            <tr><td class="label">URL del Store</td><td class="mono" style="word-break:break-all">${w.url || '—'}</td></tr>
+            <tr><td class="label">Usuario</td><td class="mono">${w.username || '—'}</td></tr>
+            <tr><td class="label">Namespace</td><td class="mono">${w.namespace || '—'}</td></tr>
+            <tr><td class="label">Intervalo de poll</td><td class="mono">cada ${w.poll_interval_min || 5} min</td></tr>
+            <tr><td class="label">Última sincronización</td><td>${w.last_sync || '—'}</td></tr>
+            <tr><td class="label">Próximo poll</td><td>${w.next_poll || '—'}</td></tr>
+            <tr><td class="label">Lecturas acumuladas</td><td class="num mono">${(w.total_readings || 0).toLocaleString('es-MX')}</td></tr>
+          </table>
+          <div style="margin-top:1.2rem;display:flex;gap:10px;flex-wrap:wrap">
+            ${accionPrincipal}
+            <button class="btn btn-ghost" onclick="witsmlStartEdit('${cabin.id}')">Editar</button>
+            <button class="btn btn-ghost" onclick="witsmlTest('${cabin.id}')">Probar conexión</button>
+          </div>
+          <div id="witsml-msg-${cabin.id}" style="margin-top:1rem"></div>
+        </div>`;
+    };
+
+    const witsmlGetForm = (cabinId) => ({
+      url: document.getElementById(`witsml-url-${cabinId}`).value.trim(),
+      username: document.getElementById(`witsml-user-${cabinId}`).value.trim(),
+      password: document.getElementById(`witsml-pass-${cabinId}`).value,
+      namespace: document.getElementById(`witsml-ns-${cabinId}`).value.trim(),
+    });
+
+    const witsmlMsg = (cabinId, html) => {
+      const el = document.getElementById(`witsml-msg-${cabinId}`);
+      if (el) el.innerHTML = html;
+    };
+
+    const witsmlRefresh = () => {
+      witsmlEditMode = null;
+      const main = document.getElementById('main');
+      if (main) main.innerHTML = renderCabin();
+    };
+
+    window.witsmlStartEdit = function(cabinId) {
+      witsmlEditMode = cabinId;
+      witsmlRefresh();
+    };
+    window.witsmlCancelEdit = function() { witsmlRefresh(); };
+
+    window.witsmlTest = function(cabinId) {
+      const form = witsmlGetForm(cabinId);
+      if (!form.url || !form.namespace) {
+        witsmlMsg(cabinId, '<div class="badge badge-pending" style="display:inline-flex"><span class="badge-dot"></span>Completa URL y namespace antes de probar.</div>');
+        return;
+      }
+      witsmlMsg(cabinId, '<div class="badge badge-pending" style="display:inline-flex"><span class="badge-dot"></span>Probando conexión...</div>');
+      // Mock: simula 800ms de latencia, luego ok
+      setTimeout(() => {
+        witsmlMsg(cabinId, '<div class="badge badge-active" style="display:inline-flex"><span class="badge-dot"></span>Conexión exitosa · WITSML 1.4.1 · namespace OK</div>');
+      }, 800);
+    };
+
+    window.witsmlSave = function(cabinId) {
+      const form = witsmlGetForm(cabinId);
+      if (!form.url || !form.username || !form.namespace) {
+        witsmlMsg(cabinId, '<div class="badge badge-pending" style="display:inline-flex"><span class="badge-dot"></span>Completa URL, usuario y namespace.</div>');
+        return;
+      }
+      if (!form.password) {
+        witsmlMsg(cabinId, '<div class="badge badge-pending" style="display:inline-flex"><span class="badge-dot"></span>Falta la contraseña.</div>');
+        return;
+      }
+      const cabin = MOCK_CABINS.find(c => c.id === cabinId);
+      if (!cabin) return;
+      const wasNew = !cabin.witsml || cabin.witsml.estado === 'none';
+      cabin.witsml = {
+        estado: 'active',
+        url: form.url,
+        username: form.username,
+        namespace: form.namespace,
+        password_ref: `_secrets/cabin_${cabinId}_witsml`,
+        poll_interval_min: cabin.witsml?.poll_interval_min || 5,
+        last_sync: 'hace un momento',
+        next_poll: `en ${cabin.witsml?.poll_interval_min || 5} min`,
+        total_readings: cabin.witsml?.total_readings || 0,
+      };
+      witsmlRefresh();
+      showToast(wasNew ? `WITSML activado en ${cabin.nombre}` : `WITSML actualizado en ${cabin.nombre}`);
+    };
+
+    window.witsmlActivate = function(cabinId) {
+      const cabin = MOCK_CABINS.find(c => c.id === cabinId);
+      if (!cabin) return;
+      cabin.witsml.estado = 'active';
+      cabin.witsml.last_sync = 'hace un momento';
+      cabin.witsml.next_poll = `en ${cabin.witsml.poll_interval_min || 5} min`;
+      witsmlRefresh();
+      showToast(`WITSML reactivado en ${cabin.nombre}`);
+    };
+
+    window.witsmlTogglePause = function(cabinId) {
+      const cabin = MOCK_CABINS.find(c => c.id === cabinId);
+      if (!cabin) return;
+      cabin.witsml.estado = cabin.witsml.estado === 'active' ? 'paused' : 'active';
+      if (cabin.witsml.estado === 'active') {
+        cabin.witsml.last_sync = 'hace un momento';
+        cabin.witsml.next_poll = `en ${cabin.witsml.poll_interval_min || 5} min`;
+      } else {
+        cabin.witsml.next_poll = '—';
+      }
+      witsmlRefresh();
+      showToast(cabin.witsml.estado === 'paused' ? `WITSML pausado en ${cabin.nombre}` : `WITSML reanudado en ${cabin.nombre}`);
+    };
+
+    const renderCabin = () => {
+      const id = location.hash.split('?')[0].split('/').pop();
+      const cabin = getCabin(id);
+      if (!cabin) return renderDashboard();
+      const tab = (location.hash.split('?tab=')[1]) || 'resumen';
+
+      const tabContent = {
+        visor: renderVisor(cabin.id),
+        resumen: `
+          <div class="section-card">
+            <h3>Información del pozo</h3>
+            <table class="params-table">
+              <tr><td class="label">Pozo</td><td class="num mono">${cabin.nombre}</td></tr>
+              <tr><td class="label">Campo</td><td class="num mono">${cabin.campo}</td></tr>
+              <tr><td class="label">Equipo</td><td class="num mono">${cabin.equipo}</td></tr>
+              <tr><td class="label">Operador</td><td class="num mono">${cabin.operador}</td></tr>
+              <tr><td class="label">Etapa actual</td><td class="num mono">${cabin.etapa}</td></tr>
+              <tr><td class="label">Formación objetivo</td><td class="num mono">${cabin.formacion}</td></tr>
+              <tr><td class="label">Inicio perforación</td><td class="num mono">${cabin.inicio}</td></tr>
+              <tr><td class="label">Profundidad total</td><td class="num mono">${fmt(cabin.profundidad_total)} m MD</td></tr>
+              <tr><td class="label">Días operación</td><td class="num mono">${cabin.dias_op}</td></tr>
+              <tr><td class="label">Estado</td><td>${badge(cabin.estado)}</td></tr>
+            </table>
+          </div>`,
+        parametros: (() => {
+          const dataset = VISOR_DATA[cabin.id];
+          if (!dataset) {
+            return `<div class="visor-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M9 3v18"/>
+              </svg>
+              <h3>Sin parámetros de perforación</h3>
+              <p>Esta cabina aún no tiene datos de parámetros (CSV BASE GENERAL) cargados.</p>
+              <p class="muted">Sube el archivo desde la pestaña <strong>Config</strong> para ver los promedios aquí.</p>
+            </div>`;
+          }
+          const { params } = dataset;
+          const min = (k) => Math.min(...params.map(d => d[k]));
+          const max = (k) => Math.max(...params.map(d => d[k]));
+          const avg = (k) => params.reduce((s, d) => s + d[k], 0) / params.length;
+          const fmt = (v) => v % 1 === 0 ? v.toLocaleString('es-MX', {maximumFractionDigits:0}) : v.toFixed(2);
+          const rows = [
+            { label: 'ROP', key: 'rop', unit: 'm/h', decimals: 0 },
+            { label: 'Densidad lodo entrada', key: 'denIn', unit: 'g/cm³', decimals: 2 },
+            { label: 'Densidad lodo salida', key: 'denOut', unit: 'g/cm³', decimals: 2 },
+            { label: 'Presión de bomba', key: 'spp', unit: 'psi', decimals: 0 },
+            { label: 'RPM', key: 'rpm', unit: 'rpm', decimals: 0 },
+            { label: 'WOB', key: 'wob', unit: 'ton', decimals: 2 },
+            { label: 'Gasto', key: 'gpm', unit: 'gpm', decimals: 0 },
+            { label: 'Temp. entrada', key: 'tempIn', unit: '°C', decimals: 1 },
+            { label: 'Temp. salida', key: 'tempOut', unit: '°C', decimals: 1 },
+          ];
+          return `
+          <div class="section-card">
+            <h3>Parámetros operacionales — Promedio 24h</h3>
+            <p class="view-subtitle" style="margin-bottom:1rem">Datos del CSV BASE GENERAL · ${params.length} puntos sub-muestreados</p>
+            <table class="params-table">
+              <thead><tr><th>Parámetro</th><th>Mínimo</th><th>Promedio</th><th>Máximo</th><th>Unidad</th></tr></thead>
+              <tbody>
+                ${rows.map(r => `
+                  <tr>
+                    <td class="label">${r.label}</td>
+                    <td class="num mono">${fmt(min(r.key))}</td>
+                    <td class="num mono">${fmt(avg(r.key))}</td>
+                    <td class="num mono">${fmt(max(r.key))}</td>
+                    <td>${r.unit}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+        })(),
+        reportes: `
+          <div class="section-card">
+            <div class="section-card-header">
+              <h3>Reportes generados</h3>
+              <button class="btn btn-primary" onclick="navigate('#/cabin/${cabin.id}/upload')">${ICONS.upload}<span>Subir CSV</span></button>
+            </div>
+            <table class="params-table">
+              <thead><tr><th>Fecha</th><th>Tipo</th><th class="num">Metros</th><th class="num">ROP</th><th>Estado</th><th></th></tr></thead>
+              <tbody>
+                ${MOCK_REPORTS.filter(r => r.cabin === cabin.id).map(r => `
+                  <tr>
+                    <td class="mono">${r.fecha}</td>
+                    <td>${r.tipo}</td>
+                    <td class="num">${fmt(r.metros)}</td>
+                    <td class="num">${r.rop}</td>
+                    <td>${badge(r.status)}</td>
+                    <td><button class="btn btn-ghost" onclick="navigate('#/report/${r.id}')">Ver →</button></td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`,
+        manifestaciones: `
+          <div class="section-card">
+            <h3>Manifestaciones detectadas</h3>
+            ${cabin.manif_count > 0 ? `
+              <div class="cabin-card" style="cursor:default" onclick="navigate('#/manifestation/${MOCK_MANIFEST.id}')">
+                <div class="cabin-icon" style="background:var(--warn-soft);color:var(--warn)">${ICONS.alert}</div>
+                <div>
+                  <div class="cabin-name">Manifestación No. 2 — ${MOCK_MANIFEST.fecha}</div>
+                  <div class="cabin-meta">Profundidad ${fmt(MOCK_MANIFEST.profundidad)} m · Gas ${fmt(MOCK_MANIFEST.gas_lectura)} ppm · Factor ${MOCK_MANIFEST.factor_pico}×</div>
+                </div>
+                <button class="btn btn-secondary">Ver reporte →</button>
+              </div>` : '<p class="view-subtitle">No se han detectado manifestaciones en este pozo.</p>'}
+          </div>`,
+        config: `
+          <div class="section-card">
+            <h3>Configuración de la cabina</h3>
+            <table class="params-table">
+              <tr><td class="label">Empresa operadora</td><td>${cabin.empresa}</td></tr>
+              <tr><td class="label">Equipo de perforación</td><td>${cabin.equipo}</td></tr>
+              <tr><td class="label">Operador petrolero</td><td>${cabin.operador}</td></tr>
+              <tr><td class="label">Notificaciones email</td><td><span class="badge badge-active"><span class="badge-dot"></span>Activas</span></td></tr>
+              <tr><td class="label">Auto-generar SIOP</td><td><span class="badge badge-active"><span class="badge-dot"></span>06:00 hrs</span></td></tr>
+              <tr><td class="label">Umbral gas (alerta)</td><td class="num mono">2,000 ppm</td></tr>
+              <tr><td class="label">Factor pico manifestación</td><td class="num mono">5×</td></tr>
+              <tr><td class="label">Archivos cargados</td><td>${cabin.archivos_cargados || 0} de 8</td></tr>
+            </table>
+          </div>
+          ${renderWitsmlConfig(cabin)}
+          <div class="section-card">
+            <h3>Archivos de la cabina</h3>
+            <p class="view-subtitle" style="margin-bottom:1rem">Gestiona los archivos que alimentan los reportes automáticos. Mismos controles que durante el alta.</p>
+            ${renderArchivosList(cabin.archivos || { parametros: null, cromatografia: null, plantilla_siop: null, ejemplos_siop: [], atlas_litologico: null, paleontologia: null, survey: null, barrena: null, programa: null }, cabin.id)}
+          </div>`,
+      };
+
+      const tabs = ['visor', 'resumen', 'parametros', 'reportes', 'manifestaciones', 'config'];
+      return `
+        ${renderTopbar(`<strong>Cabinas</strong> / ${cabin.nombre}`)}
+        <div class="content">
+          <div class="view-header">
+            <h1 class="view-title">${cabin.nombre}</h1>
+            <p class="view-subtitle">${cabin.campo} · ${cabin.equipo} · ${badge(cabin.estado)}</p>
+            <div class="view-actions">
+              <button class="btn btn-primary" onclick="navigate('#/cabin/${cabin.id}/upload')">${ICONS.upload}<span>Subir CSV</span></button>
+              <button class="btn btn-secondary">${ICONS.fileText}<span>Exportar</span></button>
+            </div>
+          </div>
+          <div class="tabs">
+            ${tabs.map(t => `<div class="tab ${t === tab ? 'active' : ''}" onclick="navigate('#/cabin/${cabin.id}?tab=${t}')">${t.charAt(0).toUpperCase() + t.slice(1)}</div>`).join('')}
+          </div>
+          ${tabContent[tab] || tabContent.resumen}
+        </div>`;
+    };
+
+    const renderUpload = () => {
+      const id = location.hash.split('/').slice(-2, -1)[0];
+      const cabin = getCabin(id);
+      if (!cabin) return renderDashboard();
+
+      const previewRows = [
+        ['08:00', '3450.5', '12.4', '95', '3200', '1.52', '1.52', '180'],
+        ['09:00', '3462.9', '12.4', '92', '3250', '1.52', '1.52', '210'],
+        ['10:00', '3475.2', '12.3', '88', '3300', '1.52', '1.52', '195'],
+        ['11:00', '3487.6', '12.4', '94', '3280', '1.52', '1.52', '205'],
+        ['12:00', '3500.0', '12.4', '96', '3290', '1.52', '1.52', '188'],
+      ];
+
+      return `
+        ${renderTopbar(`<strong>Cabinas</strong> / ${cabin.nombre} / <strong>Subir CSV</strong>`)}
+        <div class="content">
+          <div class="view-header">
+            <h1 class="view-title">Subir CSV del día</h1>
+            <p class="view-subtitle">El archivo se procesará con IA y generará el SIOP automáticamente. Vista previa antes de generar.</p>
+          </div>
+
+          <div class="upload-zone" id="dropzone" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="event.preventDefault();this.classList.remove('dragover');showToast('CSV cargado (mock)')">
+            ${ICONS.upload}
+            <h3>Arrastra tu archivo CSV aquí</h3>
+            <p>O haz click para seleccionar · Máximo 50 MB</p>
+            <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--muted)">Formato esperado: PWD / SCADA con columnas de profundidad, ROP, WOB, RPM, densidad, gas</p>
+          </div>
+
+          <div class="upload-preview">
+            <div class="upload-preview-header">
+              <div>
+                <strong>base_general_2022_07_28.csv</strong>
+                <div class="cabin-meta" style="margin-top:0.2rem">3,007 filas · Última modificación: 28/07/2022 23:58 hrs</div>
+              </div>
+              <button class="btn btn-primary" onclick="navigate('#/report/siop-2022-07-28')">${ICONS.check}<span>Generar SIOP</span></button>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="preview-table">
+                <thead><tr><th>hora</th><th>prof_m</th><th>wob_ton</th><th>rop_mh</th><th>pp_psi</th><th>den_in</th><th>den_out</th><th>gas_ppm</th></tr></thead>
+                <tbody>${previewRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+              </table>
+            </div>
+            <p style="margin-top:1rem;font-size:0.8rem;color:var(--muted)">Mostrando 5 de 3,007 filas · <a style="color:var(--primary);cursor:pointer" onclick="showToast('Descargando CSV completo...')">descargar completo</a></p>
+          </div>
+        </div>`;
+    };
+
+    const renderReport = () => {
+      const id = location.hash.split('/').pop();
+      const report = getReport(id);
+      if (!report) return renderDashboard();
+      const cabin = getCabin(report.cabin);
+
+      return `
+        ${renderTopbar(`<strong>Reportes</strong> / ${report.tipo} ${report.fecha}`)}
+        <div class="content">
+          <div class="report-header">
+            <div class="view-title">SIOP — ${report.fecha}</div>
+            <div class="report-meta">
+              <div><strong>Pozo:</strong> ${cabin.nombre}</div>
+              <div><strong>Etapa:</strong> ${cabin.etapa}</div>
+              <div><strong>Formación:</strong> ${cabin.formacion}</div>
+              <div><strong>Operador:</strong> ${cabin.operador}</div>
+              <div>${badge(report.status)}</div>
+            </div>
+            <div class="view-actions">
+              <button class="btn btn-primary" onclick="showToast('Reporte validado')">${ICONS.check}<span>Validar reporte</span></button>
+              <button class="btn btn-secondary" onclick="showToast('Generando PDF...')">${ICONS.download}<span>Exportar PDF</span></button>
+            </div>
+          </div>
+
+          <div class="report-body">
+            <div class="report-section">
+              <h4>Perforación 24h</h4>
+              <div class="report-grid">
+                <div class="report-grid-item"><span>Profundidad 00:00 hrs</span><span>${fmt(report.prof_ini)} m</span></div>
+                <div class="report-grid-item"><span>Profundidad 24:00 hrs</span><span>${fmt(report.prof_fin)} m</span></div>
+                <div class="report-grid-item"><span>Metros perforados</span><span>${fmt(report.metros)} m</span></div>
+                <div class="report-grid-item"><span>ROP promedio</span><span>${report.rop} m/h</span></div>
+                <div class="report-grid-item"><span>Tiempo perforando</span><span>18.5 hrs</span></div>
+                <div class="report-grid-item"><span>Tiempo no productivo</span><span>5.5 hrs</span></div>
+              </div>
+            </div>
+
+            <div class="report-section">
+              <h4>Parámetros de perforación</h4>
+              <div class="report-grid">
+                <div class="report-grid-item"><span>Densidad entrada</span><span>1.52 g/cm³</span></div>
+                <div class="report-grid-item"><span>Densidad salida</span><span>1.53 g/cm³</span></div>
+                <div class="report-grid-item"><span>Presión de bomba</span><span>2,650 psi</span></div>
+                <div class="report-grid-item"><span>RPM</span><span>115</span></div>
+                <div class="report-grid-item"><span>WOB</span><span>5 ton</span></div>
+                <div class="report-grid-item"><span>Torque</span><span>5,800 lb-ft</span></div>
+              </div>
+            </div>
+
+            <div class="report-section">
+              <h4>Gas y manifestaciones</h4>
+              <div class="report-grid">
+                <div class="report-grid-item"><span>Gas total promedio</span><span>450 ppm</span></div>
+                <div class="report-grid-item"><span>Gas total máximo</span><span>${fmt(report.id === 'siop-2022-07-28' ? 10260 : 850)} ppm</span></div>
+                <div class="report-grid-item"><span>C1 (metano)</span><span>320 ppm</span></div>
+                <div class="report-grid-item"><span>C2 (etano)</span><span>85 ppm</span></div>
+                <div class="report-grid-item"><span>C3 (propano)</span><span>32 ppm</span></div>
+                <div class="report-grid-item"><span>Manifestaciones</span><span>${report.id === 'siop-2022-07-15' ? '0' : '1 (ver detalle)'}</span></div>
+              </div>
+            </div>
+
+            <div class="report-section">
+              <h4>Litología</h4>
+              <div class="observations">
+                Lutita gris claro, ligeramente calcárea, con escasas piritas diseminadas. Trazas de foraminíferos planctónicos. Dureza media, fractura concoidea. Mioceno Superior.
+              </div>
+            </div>
+
+            <div class="report-section">
+              <h4>Observaciones operativas</h4>
+              <div class="observations">
+                ${report.id === 'siop-2022-07-15' ? 'Inicio de etapa 9 5/8". Instalación de cabina de registros continuos. Pruebas de BOP exitosas. Se continúa perforando con sarta rotatoria.' :
+                  report.id === 'siop-2022-07-16' ? 'Continúa perforación. Sarta rotatoria estable. Conexiones cada 9.5 m. Sin incidencias. Backreaming nocturno de 02:00 a 03:30 hrs por empaquetamiento.' :
+                  'Cierre de etapa 8 1/2". Profundidad final alcanzada. corrida de registros eléctricos programada para las siguientes 24 hrs. POZO EN CONDICIONES DE BAJAR COMPLETACIÓN.'}
+              </div>
+            </div>
+          </div>
+        </div>`;
+    };
+
+    const renderManifest = () => `
+      ${renderTopbar('<strong>Manifestaciones</strong> / Kali-10')}
+      <div class="content">
+        <div class="view-header">
+          <h1 class="view-title">Manifestación No. 2</h1>
+          <p class="view-subtitle">Kali-10 · ${MOCK_MANIFEST.fecha}</p>
+          <div class="view-actions">
+            <button class="btn btn-secondary" onclick="navigate('#/report/siop-2022-07-28')">${ICONS.fileText}<span>Ver SIOP del día</span></button>
+            <button class="btn btn-primary" onclick="showToast('Reporte de manifestación generado')">${ICONS.download}<span>Exportar reporte</span></button>
+          </div>
+        </div>
+
+        <div class="manifest-hero">
+          <h2>${MOCK_MANIFEST.factor_pico}× sobre background</h2>
+          <p style="color:var(--ink-2)">Pico de gas detectado durante perforación. Cambio litológico probable.</p>
+          <div class="manifest-stats">
+            <div>
+              <div class="manifest-stat-label">Profundidad</div>
+              <div class="manifest-stat-value">${fmt(MOCK_MANIFEST.profundidad)} m</div>
+            </div>
+            <div>
+              <div class="manifest-stat-label">Gas lectura</div>
+              <div class="manifest-stat-value" style="color:var(--warn)">${fmt(MOCK_MANIFEST.gas_lectura)} ppm</div>
+            </div>
+            <div>
+              <div class="manifest-stat-label">Background</div>
+              <div class="manifest-stat-value">${fmt(MOCK_MANIFEST.gas_background)} ppm</div>
+            </div>
+            <div>
+              <div class="manifest-stat-label">Tiempo respuesta</div>
+              <div class="manifest-stat-value">${MOCK_MANIFEST.tiempo_respuesta} min</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3>Análisis</h3>
+          <table class="params-table">
+            <tr><td class="label">Formación</td><td>${MOCK_MANIFEST.formacion}</td></tr>
+            <tr><td class="label">Causa probable</td><td>${MOCK_MANIFEST.causa}</td></tr>
+            <tr><td class="label">Componentes del gas</td><td class="mono">C1: 8,200 ppm · C2: 1,450 ppm · C3: 410 ppm · iC4: 95 ppm</td></tr>
+            <tr><td class="label">Acción tomada</td><td>Circulación de fondo, control de densidad +0.03 g/cm³, monitoreo continuo por 2 hrs</td></tr>
+            <tr><td class="label">Resolución</td><td><span class="badge badge-active"><span class="badge-dot"></span>Controlada a las 19:42 hrs</span></td></tr>
+            <tr><td class="label">Reportó</td><td>Geólogo de turno: J. Hernández · Validó: ${MOCK_USER.nombre}</td></tr>
+          </table>
+        </div>
+      </div>`;
+
+    const renderSettings = () => `
+      ${renderTopbar('<strong>Configuración</strong>')}
+      <div class="content">
+        <div class="view-header">
+          <h1 class="view-title">Configuración</h1>
+          <p class="view-subtitle">Datos de la empresa, plan y usuarios del equipo</p>
+        </div>
+
+        <div class="section-card">
+          <h3>Empresa</h3>
+          <table class="params-table">
+            <tr><td class="label">Razón social</td><td>Data-AgenThinkOs S.A. de C.V.</td></tr>
+            <tr><td class="label">RFC</td><td class="mono">DAS240107XX9</td></tr>
+            <tr><td class="label">Domicilio fiscal</td><td>Villahermosa, Tabasco, México</td></tr>
+            <tr><td class="label">Contacto principal</td><td>${MOCK_USER.nombre} · ${MOCK_USER.email}</td></tr>
+            <tr><td class="label">Plan actual</td><td><span class="badge badge-active"><span class="badge-dot"></span>${MOCK_USER.plan}</span></td></tr>
+            <tr><td class="label">Cabinas contratadas</td><td>1 de 1 (piloto)</td></tr>
+            <tr><td class="label">Próxima facturación</td><td class="mono">15/10/2026 · $50,000 MXN</td></tr>
+          </table>
+        </div>
+
+        <div class="section-card">
+          <h3>Equipo de trabajo</h3>
+          <table class="params-table">
+            <thead><tr><th>Nombre</th><th>Rol</th><th>Email</th><th>Último acceso</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>${MOCK_USER.nombre}</td><td>Administrador</td><td class="mono">${MOCK_USER.email}</td><td class="mono">Hoy, 14:32</td><td><span class="badge badge-active"><span class="badge-dot"></span>Activo</span></td></tr>
+              <tr><td>J. Hernández</td><td>Geólogo de turno</td><td class="mono">jhernandez@data-agenthinkos.com</td><td class="mono">Hoy, 06:18</td><td><span class="badge badge-active"><span class="badge-dot"></span>Activo</span></td></tr>
+              <tr><td>M. Rodríguez</td><td>Geólogo de turno</td><td class="mono">mrodriguez@data-agenthinkos.com</td><td class="mono">Ayer, 22:05</td><td><span class="badge badge-active"><span class="badge-dot"></span>Activo</span></td></tr>
+              <tr><td>L. Vázquez</td><td>Geólogo de turno</td><td class="mono">lvazquez@data-agenthinkos.com</td><td class="mono">15 sep, 18:44</td><td><span class="badge badge-completed"><span class="badge-dot"></span>Inactivo</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section-card">
+          <h3>Notificaciones</h3>
+          <table class="params-table">
+            <tr><td class="label">Reporte diario generado</td><td><span class="badge badge-active"><span class="badge-dot"></span>Email 06:00 hrs</span></td></tr>
+            <tr><td class="label">Manifestación detectada</td><td><span class="badge badge-active"><span class="badge-dot"></span>Email + SMS inmediato</span></td></tr>
+            <tr><td class="label">Validación pendiente</td><td><span class="badge badge-pending"><span class="badge-dot"></span>Email cada 2 hrs</span></td></tr>
+            <tr><td class="label">Resumen semanal</td><td><span class="badge badge-completed"><span class="badge-dot"></span>Desactivado</span></td></tr>
+          </table>
+        </div>
+      </div>`;
+
+    /* ======================== WIZARD ======================== */
+    let wizardStep = 1;
+    let wizardData = {
+      nombre: '', campo: '', empresa: MOCK_USER.empresa, operador: 'OPEX', coordinador: '',
+      formacion: '', prof_total: '', etapa_actual: '', etapas_planeadas: '',
+      inicio: '', fin_estimada: '', equipo: '', coordenadas: '',
+      geologos: '', umbral_gas: 2000, factor_pico: 5, auto_siop_hora: '06:00',
+      notif_email: true, notif_sms: false,
+      witsml: { configurar: false, url: '', username: '', namespace: '', password: '' },
+      archivos: {
+        parametros: null,
+        cromatografia: null,
+        plantilla_siop: null,
+        ejemplos_siop: [],
+        atlas_litologico: null,
+        paleontologia: null,
+        survey: null,
+        barrena: null,
+        programa: null,
+      },
+    };
+
+    const wizardSteps = [
+      { num: 1, label: 'Datos básicos', validate: () => ({ ok: !!(wizardData.nombre && wizardData.campo), msg: 'Completa nombre del pozo y campo' }) },
+      { num: 2, label: 'Configuración técnica', validate: () => ({ ok: !!(wizardData.formacion && wizardData.prof_total), msg: 'Completa formación y profundidad total' }) },
+      { num: 3, label: 'Usuarios y alertas', validate: () => ({ ok: wizardData.geologos.trim().length > 0, msg: 'Asigna al menos un geólogo (email)' }) },
+      { num: 4, label: 'Datos de entrada', validate: () => ({ ok: true, msg: '' }) }, // Opcional
+      { num: 5, label: 'Fuente WITSML', validate: () => {
+          if (!wizardData.witsml.configurar) return { ok: true, msg: '' };
+          if (!wizardData.witsml.url.trim()) return { ok: false, msg: 'Falta la URL del WITSML Store' };
+          if (!wizardData.witsml.namespace.trim()) return { ok: false, msg: 'Falta el namespace EML' };
+          return { ok: true, msg: '' };
+        } },
+    ];
+
+    const resetWizard = () => {
+      wizardStep = 1;
+      wizardData = {
+        nombre: '', campo: '', empresa: MOCK_USER.empresa, operador: 'OPEX', coordinador: '',
+        formacion: '', prof_total: '', etapa_actual: '', etapas_planeadas: '',
+        inicio: '', fin_estimada: '', equipo: '', coordenadas: '',
+        geologos: '', umbral_gas: 2000, factor_pico: 5, auto_siop_hora: '06:00',
+        notif_email: true, notif_sms: false,
+        witsml: { configurar: false, url: '', username: '', namespace: '', password: '' },
+        archivos: {
+          parametros: null,      // CSV BASE GENERAL
+          cromatografia: null,   // CSV cromatografía
+          plantilla_siop: null,  // PDF plantilla Pemex
+          ejemplos_siop: [],     // PDFs de ejemplo (3-5)
+          atlas_litologico: null,// PDF atlas (opcional)
+          paleontologia: null,   // PDF paleontología (opcional)
+          survey: null,          // XLSX survey (opcional)
+          barrena: null,         // PDF IADC (opcional)
+          programa: null,         // XLSX programa perforación (opcional)
+        },
+      };
+    };
+
+    const renderStepper = () => wizardSteps.map((s, i) => {
+      const cls = s.num < wizardStep ? 'done' : s.num === wizardStep ? 'active' : '';
+      const dotInner = s.num < wizardStep ? ICONS.check : s.num;
+      return `<div class="wizard-step">
+        <div class="wizard-dot ${cls}">${dotInner}</div>
+        <div class="wizard-label ${cls}">${s.label}</div>
+      </div>${i < wizardSteps.length - 1 ? `<div class="wizard-line ${s.num < wizardStep ? 'done' : ''}"></div>` : ''}`;
+    }).join('');
+
+    const renderStep1 = () => `
+      <div class="section-card">
+        <h3>Datos básicos del pozo</h3>
+        <p class="view-subtitle" style="margin-bottom:1.5rem">Información de identificación de la cabina.</p>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Nombre del pozo *</label>
+            <input type="text" value="${wizardData.nombre}" placeholder="Ej: Kali-11" oninput="wizardData.nombre=this.value">
+            <span class="help">Único dentro de tu empresa</span>
+          </div>
+          <div class="form-field">
+            <label>Campo *</label>
+            <input type="text" value="${wizardData.campo}" placeholder="Ej: Kali" oninput="wizardData.campo=this.value">
+          </div>
+          <div class="form-field">
+            <label>Empresa operadora *</label>
+            <input type="text" value="${wizardData.empresa}" disabled>
+          </div>
+          <div class="form-field">
+            <label>Operador petrolero</label>
+            <select onchange="wizardData.operador=this.value">
+              ${['Pemex','OPEX','PERFOMEX','DS Servicios','Otro'].map(o => `<option ${wizardData.operador===o?'selected':''}>${o}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-field span-2">
+            <label>Coordinador de cabina</label>
+            <input type="text" value="${wizardData.coordinador}" placeholder="Nombre completo" oninput="wizardData.coordinador=this.value">
+          </div>
+        </div>
+      </div>`;
+
+    const renderStep2 = () => `
+      <div class="section-card">
+        <h3>Configuración técnica</h3>
+        <p class="view-subtitle" style="margin-bottom:1.5rem">Programa del pozo y equipo de perforación.</p>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Formación objetivo *</label>
+            <input type="text" value="${wizardData.formacion}" placeholder="Ej: Mioceno Superior" oninput="wizardData.formacion=this.value">
+          </div>
+          <div class="form-field">
+            <label>Profundidad total planeada (m MD) *</label>
+            <input type="number" value="${wizardData.prof_total}" placeholder="Ej: 4200" oninput="wizardData.prof_total=this.value">
+          </div>
+          <div class="form-field">
+            <label>Etapa actual</label>
+            <input type="text" value="${wizardData.etapa_actual}" placeholder='Ej: 8.5"' oninput="wizardData.etapa_actual=this.value">
+          </div>
+          <div class="form-field">
+            <label>Etapas planeadas</label>
+            <input type="text" value="${wizardData.etapas_planeadas}" placeholder='9 5/8" → 8 1/2" → 7"' oninput="wizardData.etapas_planeadas=this.value">
+          </div>
+          <div class="form-field">
+            <label>Inicio perforación</label>
+            <input type="date" value="${wizardData.inicio}" oninput="wizardData.inicio=this.value">
+          </div>
+          <div class="form-field">
+            <label>Fin estimado</label>
+            <input type="date" value="${wizardData.fin_estimada}" oninput="wizardData.fin_estimada=this.value">
+          </div>
+          <div class="form-field">
+            <label>Equipo de perforación</label>
+            <input type="text" value="${wizardData.equipo}" placeholder="Ej: TUNDRA" oninput="wizardData.equipo=this.value">
+          </div>
+          <div class="form-field">
+            <label>Coordenadas (lat, lon)</label>
+            <input type="text" value="${wizardData.coordenadas}" placeholder="Opcional" oninput="wizardData.coordenadas=this.value">
+          </div>
+        </div>
+      </div>`;
+
+    const renderStep3 = () => `
+      <div class="section-card">
+        <h3>Usuarios y alertas</h3>
+        <p class="view-subtitle" style="margin-bottom:1.5rem">Quiénes reciben alertas y cómo se generan los reportes automáticos.</p>
+        <div class="form-grid">
+          <div class="form-field span-2">
+            <label>Geólogos asignados *</label>
+            <textarea rows="2" placeholder="Emails separados por coma" oninput="wizardData.geologos=this.value">${wizardData.geologos}</textarea>
+            <span class="help">Al menos uno. Estos usuarios tendrán acceso a la cabina.</span>
+          </div>
+          <div class="form-field">
+            <label>Umbral de gas para alerta (ppm)</label>
+            <input type="number" value="${wizardData.umbral_gas}" oninput="wizardData.umbral_gas=parseInt(this.value)||0">
+            <span class="help">Default: 2,000 ppm</span>
+          </div>
+          <div class="form-field">
+            <label>Factor de pico para manifestación (×)</label>
+            <input type="number" value="${wizardData.factor_pico}" oninput="wizardData.factor_pico=parseInt(this.value)||0">
+            <span class="help">Default: 5× sobre el background</span>
+          </div>
+          <div class="form-field">
+            <label>Hora auto-generación SIOP</label>
+            <input type="time" value="${wizardData.auto_siop_hora}" oninput="wizardData.auto_siop_hora=this.value">
+            <span class="help">Default: 06:00 hrs</span>
+          </div>
+          <div class="form-field">
+            <label>Notificaciones</label>
+            <div class="checkbox-row">
+              <label><input type="checkbox" ${wizardData.notif_email?'checked':''} onchange="wizardData.notif_email=this.checked"> Email</label>
+              <label><input type="checkbox" ${wizardData.notif_sms?'checked':''} onchange="wizardData.notif_sms=this.checked"> SMS en manifestaciones</label>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // ============================================================
+    // PASO 4: Datos de entrada (subir archivos)
+    // Mapeo de archivos -> documentos que se pueden generar
+    // ============================================================
+    const ARCHIVOS_REQUERIDOS = [
+      {
+        key: 'parametros',
+        icon: '📊',  // placeholder - usaremos SVG
+        titulo: 'Parámetros de perforación (BASE GENERAL)',
+        formato: 'CSV',
+        requerido: true,
+        descripcion: 'Profundidad, ROP, WOB, RPM, SPP, GPM, densidad entrada/salida, temperatura entrada/salida. Un registro por metro perforado.',
+        genera: ['SIOP (todos los turnos)', 'CDO Matutino y Vespertino', 'DCF Avance de Fluidos', 'Boleta Diaria', 'Visor de parámetros', 'Lookahead'],
+      },
+      {
+        key: 'cromatografia',
+        icon: '🔥',
+        titulo: 'Cromatografía de gases',
+        formato: 'CSV',
+        requerido: true,
+        descripcion: 'Gas total, C1 (metano), C2 (etano), C3 (propano), iC4, nC4, iC5, nC5. Un registro por metro perforado.',
+        genera: ['Detección automática de manifestaciones', 'Gráficos de gas en SIOP', 'Reportes de Manifestación', 'Análisis de ratios (Wetness, Balance)'],
+      },
+      {
+        key: 'plantilla_siop',
+        icon: '📄',
+        titulo: 'Plantilla Pemex oficial del SIOP',
+        formato: 'PDF',
+        requerido: false,
+        descripcion: 'La plantilla que Pemex te entrega. El sistema aprende el formato exacto y replica el estilo en cada reporte.',
+        genera: ['Personalización del formato de salida', 'Cumplimiento normativo Pemex'],
+      },
+      {
+        key: 'ejemplos_siop',
+        icon: '📋',
+        titulo: 'Ejemplos de SIOP firmados (3-5 PDFs)',
+        formato: 'PDF (3-5 archivos)',
+        requerido: false,
+        descripcion: 'SIOPs reales ya firmados. El sistema los usa como referencia de estilo, redacción y estructura.',
+        genera: ['Mejor calidad de redacción', 'Estilo consistente con tu equipo'],
+      },
+      {
+        key: 'atlas_litologico',
+        icon: '🪨',
+        titulo: 'Atlas litológico (opcional)',
+        formato: 'PDF',
+        requerido: false,
+        descripcion: 'Descripción de cuttings con fotos por intervalo. Enriquece la sección de litología en los SIOPs.',
+        genera: ['Sección de litología con mayor detalle', 'Correlación con pozos vecinos'],
+      },
+      {
+        key: 'paleontologia',
+        icon: '🦴',
+        titulo: 'Reporte paleontológico (opcional)',
+        formato: 'PDF',
+        requerido: false,
+        descripcion: 'Datación de fósiles por profundidad. Enriquece la sección de paleontología.',
+        genera: ['Sección de paleontología con datación automática', 'Correlación bioestratigráfica'],
+      },
+      {
+        key: 'survey',
+        icon: '📍',
+        titulo: 'Survey direccional (opcional)',
+        formato: 'XLSX',
+        requerido: false,
+        descripcion: 'MD, inclinación, azimut, TVD, NS, EW de cada survey. Genera comparación program vs real.',
+        genera: ['Comparación program vs real en SIOP', 'Trayectoria visualizada del pozo'],
+      },
+      {
+        key: 'barrena',
+        icon: '🔧',
+        titulo: 'Desgaste de barrena IADC (opcional)',
+        formato: 'PDF',
+        requerido: false,
+        descripcion: 'Reporte de desgaste y dull bit grading. Genera métricas de ROP por barrena.',
+        genera: ['Performance de barrena', 'Alertas de barrena cerca de fin de vida'],
+      },
+    ];
+
+    const fileStatus = (key, archivos) => {
+      if (key === 'ejemplos_siop') {
+        return archivos[key].length > 0
+          ? `<span class="file-status loaded">${archivos[key].length} archivo(s) cargados</span>`
+          : `<span class="file-status pending">Pendiente · ${archivos[key].length}/3 mínimo recomendado</span>`;
+      }
+      return archivos[key]
+        ? `<span class="file-status loaded">✓ Cargado</span>`
+        : `<span class="file-status ${ARCHIVOS_REQUERIDOS.find(a => a.key === key).requerido ? 'required' : 'optional'}">${ARCHIVOS_REQUERIDOS.find(a => a.key === key).requerido ? 'Requerido' : 'Opcional'}</span>`;
+    };
+
+    // ============================================================
+    // Función global para subir/quitar archivos de una cabina ya creada
+    // Llamada desde onclick inline (debe estar en window)
+    // ============================================================
+    window.updateCabinArchivo = function(cabinId, key, value) {
+      const cabin = MOCK_CABINS.find(c => c.id === cabinId);
+      if (!cabin) return;
+      if (!cabin.archivos) cabin.archivos = {
+        parametros: null, cromatografia: null, plantilla_siop: null,
+        ejemplos_siop: [], atlas_litologico: null, paleontologia: null,
+        survey: null, barrena: null, programa: null,
+      };
+      cabin.archivos[key] = value;
+      // Recargar archivos_cargados
+      cabin.archivos_cargados = Object.entries(cabin.archivos).filter(([k, v]) => Array.isArray(v) ? v.length > 0 : v !== null).length;
+      showToast(value === null || (Array.isArray(value) && value.length === 0) ? 'Archivo quitado' : 'Archivo cargado (mock)');
+      renderRoute();
+    };
+
+    const fileButton = (key, archivos, cabinId) => {
+      // En el wizard usa wizardData.archivos
+      // En la cabina ya creada usa window.updateCabinArchivo
+      if (cabinId) {
+        if (key === 'ejemplos_siop') {
+          const count = archivos[key].length;
+          return count > 0
+            ? `<button class="btn btn-secondary" onclick="window.updateCabinArchivo('${cabinId}','${key}',[])">Quitar todos</button>`
+            : `<button class="btn btn-primary" onclick="window.updateCabinArchivo('${cabinId}','${key}',['ejemplo1.pdf','ejemplo2.pdf','ejemplo3.pdf'])">Subir PDFs</button>`;
+        }
+        return archivos[key]
+          ? `<button class="btn btn-secondary" onclick="window.updateCabinArchivo('${cabinId}','${key}',null)">Quitar</button>`
+          : `<button class="btn btn-primary" onclick="window.updateCabinArchivo('${cabinId}','${key}','archivo_${key}.csv')">Subir ${ARCHIVOS_REQUERIDOS.find(a => a.key === key).formato}</button>`;
+      }
+      // Wizard
+      if (key === 'ejemplos_siop') {
+        const count = archivos[key].length;
+        return count > 0
+          ? `<button class="btn btn-secondary" onclick="wizardData.archivos.${key}=[];rerenderWizard()">Quitar todos</button>`
+          : `<button class="btn btn-primary" onclick="showToast('Subir múltiples PDFs (mock)');wizardData.archivos.${key}=['ejemplo1.pdf','ejemplo2.pdf','ejemplo3.pdf'];rerenderWizard()">Subir PDFs</button>`;
+      }
+      return archivos[key]
+        ? `<button class="btn btn-secondary" onclick="wizardData.archivos.${key}=null;rerenderWizard()">Quitar</button>`
+        : `<button class="btn btn-primary" onclick="showToast('Subir archivo (mock)');wizardData.archivos.${key}='archivo_${key}.csv';rerenderWizard()">Subir ${ARCHIVOS_REQUERIDOS.find(a => a.key === key).formato}</button>`;
+    };
+
+    // Lista de archivos reutilizable (wizard y post-creación)
+    const renderArchivosList = (archivos, cabinId) => {
+      return `
+        <div class="upload-list">
+          ${ARCHIVOS_REQUERIDOS.map(a => {
+            const loaded = a.key === 'ejemplos_siop' ? archivos[a.key].length > 0 : archivos[a.key] !== null;
+            return `
+            <div class="upload-item ${loaded ? 'loaded' : ''}">
+              <div class="upload-item-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+                  ${a.key === 'parametros' ? '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>' : ''}
+                  ${a.key === 'cromatografia' ? '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 17c1.5 0 2.5-1 2.5-2.5 0-1.5-1-2-2-2.5l-2-1c-1-.5-2-1-2-2.5 0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5"/><path d="M12 2C8 2 5 5 5 9c0 2 .5 3.5 1.5 5L12 22l5.5-8c1-1.5 1.5-3 1.5-5 0-4-3-7-7-7z"/>' : ''}
+                  ${a.key === 'plantilla_siop' ? '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' : ''}
+                  ${a.key === 'ejemplos_siop' ? '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>' : ''}
+                  ${a.key === 'atlas_litologico' ? '<path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>' : ''}
+                  ${a.key === 'paleontologia' ? '<circle cx="12" cy="8" r="4"/><path d="M6 22c0-4 2-7 6-7s6 3 6 7"/>' : ''}
+                  ${a.key === 'survey' ? '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/><path d="M3 3l18 18"/>' : ''}
+                  ${a.key === 'barrena' ? '<circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6M12 3v6M12 15v6"/>' : ''}
+                </svg>
+              </div>
+              <div class="upload-item-body">
+                <div class="upload-item-head">
+                  <h4>${a.titulo}</h4>
+                  ${fileStatus(a.key, archivos)}
+                </div>
+                <p class="upload-item-desc">${a.descripcion}</p>
+                <div class="upload-item-genera">
+                  <strong>Genera:</strong> ${a.genera.join(' · ')}
+                </div>
+              </div>
+              <div class="upload-item-action">
+                ${fileButton(a.key, archivos, cabinId)}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+    };
+
+    const renderStep4 = () => {
+      const cargados = ARCHIVOS_REQUERIDOS.filter(a => {
+        if (a.key === 'ejemplos_siop') return wizardData.archivos[a.key].length > 0;
+        return wizardData.archivos[a.key] !== null;
+      }).length;
+      const total = ARCHIVOS_REQUERIDOS.length;
+
+      // Calcular qué documentos se podrán generar según archivos cargados
+      const docs = [
+        { nombre: 'SIOP (todos los turnos)', ok: !!wizardData.archivos.parametros, requerido: true },
+        { nombre: 'CDO Matutino y Vespertino', ok: !!wizardData.archivos.parametros, requerido: true },
+        { nombre: 'DCF Avance de Fluidos', ok: !!wizardData.archivos.parametros, requerido: true },
+        { nombre: 'Boleta Diaria', ok: !!wizardData.archivos.parametros, requerido: true },
+        { nombre: 'Lookahead', ok: !!wizardData.archivos.parametros, requerido: true },
+        { nombre: 'Reporte de Manifestación', ok: !!wizardData.archivos.cromatografia, requerido: true },
+        { nombre: 'Sección de Litología', ok: !!wizardData.archivos.atlas_litologico, requerido: false },
+        { nombre: 'Sección de Paleontología', ok: !!wizardData.archivos.paleontologia, requerido: false },
+        { nombre: 'Comparación Survey', ok: !!wizardData.archivos.survey, requerido: false },
+        { nombre: 'Performance de Barrena', ok: !!wizardData.archivos.barrena, requerido: false },
+        { nombre: 'Estilo Pemex personalizado', ok: wizardData.archivos.ejemplos_siop.length >= 3 || !!wizardData.archivos.plantilla_siop, requerido: false },
+      ];
+
+      return `
+        <div class="section-card">
+          <h3>Archivos de la cabina</h3>
+          <p class="view-subtitle" style="margin-bottom:0.5rem">Sube los archivos que tu cabina genera. El sistema los usa para producir automáticamente los documentos de salida (SIOPs, CDOs, DCF, etc).</p>
+          <p class="view-subtitle muted" style="margin-bottom:1.5rem">
+            <strong>${cargados} de ${total} archivos cargados.</strong>
+            Los archivos marcados como <em>Requerido</em> son los mínimos para que el sistema pueda generar los reportes básicos.
+          </p>
+
+          <div class="upload-list">
+            ${renderArchivosList(wizardData.archivos, null)}
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3>Lo que el sistema podrá generar con estos archivos</h3>
+          <p class="view-subtitle" style="margin-bottom:1rem">Resumen dinámico: estos documentos se generarán automáticamente según los archivos que subas.</p>
+          <div class="docs-grid">
+            ${docs.map(d => `
+              <div class="doc-item ${d.ok ? 'ok' : 'pending'}">
+                <span class="doc-check">${d.ok ? '✓' : '○'}</span>
+                <span>${d.nombre}</span>
+                ${d.requerido ? '<span class="doc-tag">requerido</span>' : '<span class="doc-tag optional">opcional</span>'}
+              </div>
+            `).join('')}
+          </div>
+          <p class="view-subtitle muted" style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--line-soft)">
+            <strong>Tip:</strong> puedes crear la cabina ahora y subir los archivos después desde la configuración de la cabina. El sistema empezará a generar reportes en automático cuando tenga los datos mínimos.
+          </p>
+        </div>
+      `;
+    };
+
+    const renderStep5 = () => {
+      const w = wizardData.witsml;
+      const statusBadge = w.configurar
+        ? '<span class="badge badge-pending"><span class="badge-dot"></span>Por activar al crear</span>'
+        : '<span class="badge badge-completed"><span class="badge-dot"></span>No configurado</span>';
+      return `
+        <div class="section-card">
+          <h3>Fuente de datos en tiempo real (WITSML)</h3>
+          <p class="view-subtitle" style="margin-bottom:1.2rem">
+            Si tu cabina expone un servidor WITSML Store (versión 1.4.1 o 2.0), el sistema puede jalar datos cada 5 minutos sin que subas CSVs. Es opcional — si tu cabina no expone WITSML todavía, créala sin esto y configúralo después. ${statusBadge}
+          </p>
+
+          <div class="form-field" style="margin-bottom:1.2rem">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <input type="checkbox" ${w.configurar?'checked':''} onchange="wizardData.witsml.configurar=this.checked; rerenderWizard()" style="width:18px;height:18px;cursor:pointer" />
+              <span><strong>Configurar WITSML en el alta</strong> — llena los datos de conexión ahora</span>
+            </label>
+          </div>
+
+          ${w.configurar ? `
+            <div class="form-grid">
+              <div class="form-field span-2">
+                <label>URL del WITSML Store *</label>
+                <input type="text" placeholder="https://192.168.10.50/witsml/store" value="${w.url}" oninput="wizardData.witsml.url=this.value" />
+                <span class="help">URL del servidor WITSML dentro de la red de la cabina. No requiere exposición a internet.</span>
+              </div>
+              <div class="form-field">
+                <label>Usuario *</label>
+                <input type="text" placeholder="svc_cabin01" value="${w.username}" oninput="wizardData.witsml.username=this.value" />
+                <span class="help">Cuenta con permisos de lectura.</span>
+              </div>
+              <div class="form-field">
+                <label>Contraseña *</label>
+                <input type="password" placeholder="••••••••" value="${w.password}" oninput="wizardData.witsml.password=this.value" />
+                <span class="help">Se guarda encriptada. No se muestra después.</span>
+              </div>
+              <div class="form-field span-2">
+                <label>Namespace EML *</label>
+                <input type="text" placeholder="eml://demo/Kali-10" value="${w.namespace}" oninput="wizardData.witsml.namespace=this.value" />
+                <span class="help">Identificador único del pozo en el servidor. Lo encuentras en la config del WITSML Store de la cabina.</span>
+              </div>
+            </div>
+            <div style="margin-top:1rem;padding:12px 16px;background:var(--primary-soft);border-radius:8px;font-size:13px;color:var(--ink-2);line-height:1.5">
+              <strong style="color:var(--primary)">Al activar:</strong> el sistema corre una prueba de conexión. Si falla, no se guarda la configuración y te avisamos para que corrijas la URL o las credenciales. Las contraseñas se guardan en un almacén encriptado separado (<code>_secrets/</code>), no en el documento visible de la cabina.
+            </div>
+          ` : `
+            <div style="padding:16px 20px;background:var(--bg);border:1px dashed var(--line);border-radius:10px;font-size:13.5px;color:var(--ink-2);line-height:1.6">
+              <strong style="color:var(--ink)">Sin WITSML por ahora.</strong> Cuando la cabina exponga el servidor, entra a <em>Configuración de la cabina → Fuente WITSML</em> y agrégalo en 30 segundos. La cabina ya creada puede seguir operando con CSVs mientras tanto.
+            </div>
+          `}
+        </div>
+      `;
+    };
+
+    const renderStep6 = () => {
+      const items = [
+        ['Nombre del pozo', wizardData.nombre],
+        ['Campo', wizardData.campo],
+        ['Empresa operadora', wizardData.empresa],
+        ['Operador petrolero', wizardData.operador],
+        ['Coordinador', wizardData.coordinador || '—'],
+        ['Formación objetivo', wizardData.formacion],
+        ['Profundidad total', wizardData.prof_total + ' m MD'],
+        ['Etapa actual', wizardData.etapa_actual || '—'],
+        ['Etapas planeadas', wizardData.etapas_planeadas || '—'],
+        ['Inicio', wizardData.inicio || '—'],
+        ['Fin estimado', wizardData.fin_estimada || '—'],
+        ['Equipo', wizardData.equipo || '—'],
+        ['Coordenadas', wizardData.coordenadas || '—'],
+        ['Geólogos asignados', wizardData.geologos],
+        ['Umbral gas', wizardData.umbral_gas + ' ppm'],
+        ['Factor pico manifestación', wizardData.factor_pico + '×'],
+        ['Auto SIOP', wizardData.auto_siop_hora + ' hrs'],
+        ['Notificaciones', [wizardData.notif_email?'Email':'', wizardData.notif_sms?'SMS':''].filter(Boolean).join(' + ') || '—'],
+        ['Fuente WITSML', wizardData.witsml.configurar
+          ? `${wizardData.witsml.url} · ns ${wizardData.witsml.namespace}`
+          : 'No configurado (puede agregarse después)'],
+      ];
+      return `
+        <div class="section-card">
+          <h3>Confirmar datos de la nueva cabina</h3>
+          <p class="view-subtitle" style="margin-bottom:1.5rem">Revisa que todo esté correcto antes de crear la cabina.</p>
+          <div class="summary-list">
+            ${items.map(([l,v]) => `<div class="summary-item"><span class="label">${l}</span><span class="value">${v}</span></div>`).join('')}
+          </div>
+        </div>`;
+    };
+
+    const renderWizard = () => {
+      const stepContent = wizardStep === 1 ? renderStep1()
+                         : wizardStep === 2 ? renderStep2()
+                         : wizardStep === 3 ? renderStep3()
+                         : wizardStep === 4 ? renderStep4()
+                         : wizardStep === 5 ? renderStep5()
+                         : renderStep6();
+      const isConfirm = wizardStep === 6;
+      const totalInputs = 5; // Pasos 1-5 son inputs, paso 6 es confirmación
+      return `
+        ${renderTopbar('<strong>Cabinas</strong> / <strong>Nueva cabina</strong>')}
+        <div class="content">
+          <div class="view-header">
+            <h1 class="view-title">Nueva cabina</h1>
+            <p class="view-subtitle">Configura el pozo, equipo, usuarios, archivos y fuente de datos${isConfirm ? ' · Confirmación' : ' · Paso ' + wizardStep + ' de ' + totalInputs}.</p>
+          </div>
+          ${renderStepper()}
+          ${stepContent}
+          <div class="form-actions">
+            <button class="btn btn-secondary" onclick="wizardPrev()" ${wizardStep===1?'disabled':''} style="${wizardStep===1?'opacity:0.4;cursor:not-allowed':''}">← Atrás</button>
+            <div class="right">
+              <button class="btn btn-ghost" onclick="wizardCancel()">Cancelar</button>
+              ${isConfirm
+                ? `<button class="btn btn-primary" onclick="wizardFinish()">${ICONS.check}<span>Crear cabina</span></button>`
+                : `<button class="btn btn-primary" onclick="wizardNext()">Siguiente →</button>`}
+            </div>
+          </div>
+        </div>`;
+    };
+
+    const rerenderWizard = () => {
+      const main = document.getElementById('main');
+      if (main) main.innerHTML = renderWizard();
+      window.scrollTo(0, 0);
+    };
+
+    const wizardNext = () => {
+      if (wizardStep <= wizardSteps.length) {
+        const v = wizardSteps[wizardStep - 1].validate();
+        if (!v.ok) { showToast(v.msg); return; }
+      }
+      if (wizardStep < 6) { wizardStep++; rerenderWizard(); }
+    };
+    const wizardPrev = () => { if (wizardStep > 1) { wizardStep--; rerenderWizard(); } };
+    const wizardCancel = () => { resetWizard(); navigate('#/dashboard'); };
+    const wizardFinish = () => {
+      const id = wizardData.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const archivosCargados = Object.entries(wizardData.archivos).filter(([k, v]) => {
+        if (Array.isArray(v)) return v.length > 0;
+        return v !== null;
+      }).length;
+      MOCK_CABINS.push({
+        id, nombre: wizardData.nombre, campo: wizardData.campo, empresa: wizardData.empresa,
+        equipo: wizardData.equipo || 'Por asignar', operador: wizardData.operador,
+        etapa: wizardData.etapa_actual || 'Por definir',
+        profundidad_total: parseInt(wizardData.prof_total) || 0,
+        inicio: wizardData.inicio || 'Por definir', fin: wizardData.fin_estimada || null,
+        dias_op: 0, formacion: wizardData.formacion, estado: 'active',
+        metros_hoy: 0, rop_prom: 0, gas_max: 0, manif_count: 0,
+        archivos_cargados: archivosCargados,
+        archivos: wizardData.archivos,
+        witsml: wizardData.witsml.configurar
+          ? {
+              estado: 'pending',  // aún no se probó la conexión
+              url: wizardData.witsml.url,
+              username: wizardData.witsml.username,
+              namespace: wizardData.witsml.namespace,
+              password_ref: `_secrets/cabin_${id}_witsml`,
+              last_sync: '—',
+              next_poll: '—',
+              poll_interval_min: 5,
+              total_readings: 0,
+            }
+          : { estado: 'none' },
+      });
+      const witsmlMsg = wizardData.witsml.configurar ? ' · WITSML pendiente de probar' : '';
+      showToast(`Cabina ${wizardData.nombre} creada · ${archivosCargados} archivos${witsmlMsg}`);
+      resetWizard();
+      navigate('#/dashboard');
+    };
+
+    /* ======================== ROUTER ======================== */
+    const routes = {
+      'login': renderLogin,
+      'dashboard': renderDashboard,
+      'cabin': renderCabin,
+      'cabin-upload': renderUpload,
+      'report': renderReport,
+      'manifestation': renderManifest,
+      'settings': renderSettings,
+    };
+
+    function renderRoute() {
+      const hash = location.hash.replace('#/', '') || 'login';
+      const app = document.getElementById('app');
+      if (hash === 'login' || hash === '') {
+        app.innerHTML = renderLogin();
+        return;
+      }
+      if (hash === 'cabin/new') {
+        app.innerHTML = renderSidebar('cabin') + '<div id="main">' + renderWizard() + '</div>';
+        return;
+      }
+      if (hash.startsWith('cabin/') && hash.includes('/upload')) {
+        app.innerHTML = renderSidebar('cabin') + '<div id="main">' + renderUpload() + '</div>';
+        return;
+      }
+      if (hash.startsWith('cabin/')) {
+        app.innerHTML = renderSidebar('cabin') + '<div id="main">' + renderCabin() + '</div>';
+        return;
+      }
+      if (hash.startsWith('report/')) {
+        app.innerHTML = renderSidebar('dashboard') + '<div id="main">' + renderReport() + '</div>';
+        return;
+      }
+      if (hash.startsWith('manifestation/')) {
+        app.innerHTML = renderSidebar('manifestation') + '<div id="main">' + renderManifest() + '</div>';
+        return;
+      }
+      const fn = routes[hash] || renderDashboard;
+      app.innerHTML = renderSidebar(hash) + '<div id="main">' + fn() + '</div>';
+    }
+
+    window.addEventListener('hashchange', renderRoute);
+    window.addEventListener('load', renderRoute);
+    if (document.readyState === 'complete') renderRoute();
+  </script>
+</body>
+</html>

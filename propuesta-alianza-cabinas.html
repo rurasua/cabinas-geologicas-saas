@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Propuesta — Automatización de Cabinas Geológicas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5f0;
+    --surface:#ffffff;
+    --line:#e9e3d6;
+    --line-soft:#f0ebde;
+    --ink:#14171e;
+    --ink-2:#3a4256;
+    --muted:#7c7a72;
+    --primary:#2f6f5e;
+    --primary-soft:rgba(47,111,94,.08);
+    --primary-deep:#1d4a3d;
+    --accent:#c97b3f;
+    --accent-soft:rgba(201,123,63,.08);
+    --warn:#b06367;
+    --gold:#b08a3e;
+    --shadow:0 2px 8px rgba(0,0,0,.04);
+    --shadow-lg:0 4px 16px -2px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  body{background-image:radial-gradient(circle at 0% 0%,rgba(201,123,63,.05),transparent 40%),radial-gradient(circle at 100% 100%,rgba(47,111,94,.05),transparent 40%);min-height:100vh}
+  .wrap{max-width:920px;margin:0 auto;padding:48px 28px 96px}
+
+  /* Topbar / print */
+  .toolbar{position:sticky;top:0;background:var(--bg);padding:16px 0 14px;border-bottom:1px solid var(--line);margin:-48px -28px 40px;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+  .toolbar .brand{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .toolbar button{background:var(--ink);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s}
+  .toolbar button:hover{background:var(--primary)}
+  .toolbar button svg{width:14px;height:14px}
+
+  /* Hero */
+  .hero{text-align:center;padding:24px 0 48px;position:relative}
+  .hero .pre{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px}
+  .hero .pre .line{width:30px;height:1px;background:var(--accent);opacity:.6}
+  .hero h1{font-family:'DM Serif Display',serif;font-weight:400;font-size:54px;line-height:1.05;letter-spacing:-.012em;margin:0 0 18px;color:var(--ink);max-width:760px;margin-left:auto;margin-right:auto}
+  .hero h1 em{font-style:italic;color:var(--primary)}
+  .hero .lede{font-size:18px;line-height:1.5;color:var(--ink-2);max-width:680px;margin:0 auto 28px}
+  .hero .meta{display:flex;justify-content:center;gap:32px;margin-top:24px;font-size:13px;color:var(--muted)}
+  .hero .meta .d{display:block;font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);margin-bottom:2px}
+
+  /* Section */
+  section{scroll-margin-top:80px;margin-top:64px}
+  .sec-head{display:flex;align-items:center;gap:18px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+  .sec-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:#fff;background:var(--primary);padding:6px 12px;border-radius:6px;letter-spacing:.04em}
+  .sec-num.alt{background:var(--accent)}
+  .sec-title{font-family:'DM Serif Display',serif;font-weight:400;font-size:30px;line-height:1.1;color:var(--ink);margin:0;letter-spacing:-.005em}
+  .sec-title em{font-style:italic;color:var(--primary)}
+  .sec-sub{font-size:14px;color:var(--muted);margin-top:4px}
+
+  /* Page break visual */
+  .sheet{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:36px 40px;box-shadow:var(--shadow);margin-bottom:32px;position:relative;page-break-after:always}
+  .sheet-label{position:absolute;top:-10px;left:24px;background:var(--accent);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;padding:3px 10px;border-radius:4px;text-transform:uppercase}
+
+  /* Hoja 1 - servicios */
+  .serv-list{display:grid;gap:16px;margin-top:8px}
+  .serv{display:grid;grid-template-columns:54px 1fr 100px;gap:20px;align-items:start;padding:18px 0;border-bottom:1px dashed var(--line)}
+  .serv:last-child{border-bottom:none;padding-bottom:0}
+  .serv-num{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--primary);background:var(--primary-soft);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500}
+  .serv h3{margin:0 0 4px;font-size:18px;color:var(--ink);font-family:'Outfit',sans-serif;font-weight:600}
+  .serv p{margin:0;font-size:14px;color:var(--ink-2);line-height:1.5}
+  .serv .save{text-align:center;font-family:'DM Serif Display',serif;font-size:24px;color:var(--primary);line-height:1;padding:6px 0}
+  .serv .save .u{display:block;font-family:'Outfit',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;font-weight:500}
+
+  /* Hoja 2 - ahorro */
+  .roi-hero{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-deep) 100%);border-radius:14px;padding:32px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden}
+  .roi-hero::before{content:"";position:absolute;top:-50%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(201,123,63,.3),transparent 60%);opacity:.6}
+  .roi-hero .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;opacity:.7;text-transform:uppercase;margin-bottom:16px}
+  .roi-hero .big{font-family:'DM Serif Display',serif;font-size:84px;line-height:1;margin:0 0 8px;position:relative;z-index:2}
+  .roi-hero .big em{font-style:italic}
+  .roi-hero .sub{font-size:18px;opacity:.92;position:relative;z-index:2;max-width:520px}
+
+  .roi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+  .roi-cell{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 16px;text-align:center}
+  .roi-cell .v{font-family:'DM Serif Display',serif;font-size:32px;color:var(--primary);line-height:1;margin-bottom:6px}
+  .roi-cell .v.accent{color:var(--accent)}
+  .roi-cell .v.warn{color:var(--warn)}
+  .roi-cell .l{font-size:12px;color:var(--ink-2);line-height:1.35}
+
+  .roi-detail{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;background:var(--bg);border-radius:12px;border:1px solid var(--line-soft)}
+  .roi-detail h4{margin:0 0 10px;font-size:13px;color:var(--primary);font-family:'Outfit',sans-serif;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+  .roi-detail ul{margin:0;padding-left:0;list-style:none;font-size:13.5px;color:var(--ink-2);line-height:1.7}
+  .roi-detail li{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:3px 0}
+  .roi-detail li strong{color:var(--ink);font-weight:500;font-family:'JetBrains Mono',monospace;font-size:12.5px}
+
+  .roi-bench{margin-top:20px;padding:20px;background:var(--bg);border-radius:12px;border:1px solid var(--line-soft)}
+  .bench-row{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:14px}
+  .bench-label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin-bottom:2px}
+  .bench-label strong{color:var(--ink);font-weight:500}
+  .bench-track{height:18px;background:var(--line-soft);border-radius:6px;overflow:hidden;position:relative}
+  .bench-fill{height:100%;border-radius:6px;background:var(--primary);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:11px;color:#fff;font-family:'JetBrains Mono',monospace;font-weight:500}
+
+  /* Hoja 3 - alianza */
+  .alianza-grid{display:grid;grid-template-columns:1fr;gap:20px;max-width:680px;margin:0 auto}
+  .alianza{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;position:relative;display:flex;flex-direction:column}
+  .alianza.recomendada{border:2px solid var(--primary);box-shadow:0 6px 20px -4px rgba(47,111,94,.18)}
+  .alianza.recomendada::before{content:"";position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,rgba(47,111,94,.04),transparent 50%);pointer-events:none}
+  .alianza .badge{position:absolute;top:-10px;right:20px;background:var(--primary);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;padding:3px 10px;border-radius:4px;text-transform:uppercase}
+  .alianza h3{font-family:'DM Serif Display',serif;font-weight:400;font-size:24px;margin:0 0 4px;color:var(--ink);position:relative;z-index:2}
+  .alianza .sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;margin-bottom:16px;position:relative;z-index:2}
+  .alianza .quote{font-family:'DM Serif Display',serif;font-style:italic;font-size:18px;line-height:1.4;color:var(--ink);margin:0 0 18px;padding:0 0 16px;border-bottom:1px solid var(--line);position:relative;z-index:2}
+  .alianza table{width:100%;font-size:13px;position:relative;z-index:2;border-collapse:collapse}
+  .alianza th{text-align:left;font-weight:500;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 0;border-bottom:1px solid var(--line);width:42%}
+  .alianza td{padding:8px 0;border-bottom:1px dotted var(--line);color:var(--ink-2);vertical-align:top}
+  .alianza td b{color:var(--ink);font-weight:500}
+  .alianza .cuando{margin-top:auto;padding:14px;background:var(--primary-soft);border-radius:8px;font-size:13px;color:var(--ink-2);position:relative;z-index:2;margin-top:18px}
+  .alianza .cuando strong{color:var(--primary);display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+
+  /* Hoja 4 - apertura */
+  .speech{background:linear-gradient(135deg,rgba(47,111,94,.04),rgba(201,123,63,.04));border:1px solid var(--line);border-radius:16px;padding:32px 36px;margin-bottom:24px;position:relative}
+  .speech::before{content:"";position:absolute;top:24px;left:24px;width:4px;height:60px;background:var(--primary);border-radius:2px}
+  .speech .pre{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--primary);text-transform:uppercase;margin:0 0 16px 24px}
+  .speech p{font-family:'DM Serif Display',serif;font-size:24px;line-height:1.45;color:var(--ink);margin:0 0 16px 24px;letter-spacing:-.005em}
+  .speech p:last-child{margin-bottom:0}
+  .speech p .hl{background:linear-gradient(transparent 60%,rgba(201,123,63,.25) 60%);padding:0 2px}
+  .speech .alts{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:24px 0 0 24px;font-family:'Outfit',sans-serif;font-size:14.5px;color:var(--ink-2);line-height:1.6}
+  .speech .alts strong{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);letter-spacing:.06em;display:block;margin-bottom:8px;text-transform:uppercase}
+  .speech .alts .alt{margin-bottom:8px;padding-left:14px;border-left:2px solid var(--line)}
+  .speech .alts .alt:last-child{margin-bottom:0}
+  .speech .alts .alt em{color:var(--ink);font-style:normal;font-weight:500}
+
+  .do-dont{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+  .do-dont > div{padding:18px 20px;border-radius:12px}
+  .do{border:1px solid rgba(47,111,94,.25);background:rgba(47,111,94,.04)}
+  .dont{border:1px solid rgba(176,99,103,.2);background:rgba(176,99,103,.04)}
+  .do h4, .dont h4{margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-family:'Outfit',sans-serif;font-weight:600}
+  .do h4{color:var(--primary)}
+  .dont h4{color:var(--warn)}
+  .do-dont ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink-2);line-height:1.6}
+  .do-dont li{margin-bottom:4px}
+
+  /* Footer */
+  .closer{margin-top:64px;padding:36px;background:var(--ink);border-radius:16px;color:#fff;text-align:center;position:relative;overflow:hidden}
+  .closer::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--primary),var(--accent),var(--primary))}
+  .closer .pre{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+  .closer h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:36px;line-height:1.15;margin:0 0 14px;max-width:640px;margin-left:auto;margin-right:auto}
+  .closer h2 em{font-style:italic;color:var(--accent)}
+  .closer p{font-size:15px;opacity:.78;max-width:560px;margin:0 auto 20px}
+  .closer .sig{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;opacity:.5}
+
+  /* Print */
+  @media print{
+    body{background:#fff}
+    .toolbar{display:none}
+    .wrap{padding:0;max-width:100%}
+    .sheet{box-shadow:none;border:1px solid #ccc;page-break-after:always;margin:0 0 20px}
+    section{margin-top:0}
+  }
+  @media (max-width:780px){
+    .roi-grid{grid-template-columns:repeat(2,1fr)}
+    .alianza-grid,.roi-detail,.do-dont{grid-template-columns:1fr}
+    .hero h1{font-size:36px}
+    .sec-title{font-size:22px}
+    .roi-hero .big{font-size:56px}
+    .speech p{font-size:18px}
+    .closer h2{font-size:26px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ TOOLBAR ============ -->
+<div class="toolbar">
+  <div class="brand">PROPUESTA · CABINAS GEOLÓGICAS · MVP</div>
+  <button onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Imprimir las 4 hojas
+  </button>
+</div>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="pre"><span class="line"></span>Propuesta de colaboración<span class="line"></span></div>
+  <h1>Automatización de reportes en <em>cabinas geológicas</em></h1>
+  <p class="lede">Una herramienta que reduce 240 horas-hombre al mes por cabina, llena el SIOP y detecta manifestaciones en automático, sin reemplazar al geólogo de pozo.</p>
+  <div class="meta">
+    <div><span class="d">3 meses</span>De piloto a producción</div>
+    <div><span class="d">4 servicios</span>Automatizados en v1</div>
+    <div><span class="d">~2× ROI</span>Conservador, primer año</div>
+  </div>
+</div>
+
+<!-- ============ HOJA 1: SERVICIOS ============ -->
+<section id="hoja-1">
+  <div class="sec-head">
+    <div class="sec-num">1</div>
+    <div>
+      <h2 class="sec-title">Los <em>cuatro servicios</em> que el MVP automatiza</h2>
+      <div class="sec-sub">Servicios #4, #5, #12 y #14 de los 14 que ofrece una cabina geológica moderna.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Hoja 1</div>
+    <p style="font-size:15px;color:var(--ink-2);margin:0 0 24px">El MVP automatiza los cuatro servicios que son <strong style="color:var(--ink)">100% trabajo manual repetitivo</strong> en una cabina Pemex típica. No toca geología interpretativa: formatea datos numéricos en prosa, llena la plantilla oficial, y propone la próxima operación.</p>
+
+    <div class="serv-list">
+      <div class="serv">
+        <div class="serv-num">4</div>
+        <div>
+          <h3>Reporte diario de operaciones (SIOP)</h3>
+          <p>El documento que la cabina entrega cada mañana a las 06:00. Con profundidad, metros perforados, ROP, lodo, sarta, programa. El MVP lo redacta en automático desde los CSVs del día y lo deja listo para firma del geólogo.</p>
+        </div>
+        <div class="save">2-3h<div class="u">al día</div></div>
+      </div>
+
+      <div class="serv">
+        <div class="serv-num">5</div>
+        <div>
+          <h3>Reporte de manifestaciones (kicks)</h3>
+          <p>Detecta automáticamente cuando hay un incremento anómalo de gas o cambio de densidad, y dispara la plantilla del Reporte de Manifestaciones con la profundidad, las lecturas, y la respuesta del equipo.</p>
+        </div>
+        <div class="save">24/7<div class="u">alertas</div></div>
+      </div>
+
+      <div class="serv">
+        <div class="serv-num">12</div>
+        <div>
+          <h3>Lookahead operativo (próximas 24-72h)</h3>
+          <p>Propone la siguiente maniobra y los próximos puntos de casing basándose en los datos del día y el programa del operador. Igual que el Lookahead de Tarim-12 que ya tienes en la carpeta, pero generado en automático.</p>
+        </div>
+        <div class="save">7 días<div class="u">de planeación</div></div>
+      </div>
+
+      <div class="serv">
+        <div class="serv-num">14</div>
+        <div>
+          <h3>Digitalizador de archivos históricos</h3>
+          <p>Para las cabinas que aún tienen reportes en papel o PDF escaneado: convierte los archivos antiguos a CSV estructurado, alineado con el requerimiento de la Litoteca Nacional de CNH (entrega digital en 30 días).</p>
+        </div>
+        <div class="save">17K+<div class="u">pozos por migrar</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding:16px 18px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:13.5px;color:var(--ink-2);line-height:1.55">
+      <strong style="color:var(--accent)">Lo que el MVP NO toca (queda para v2):</strong> descripción litológica de cuttings, paleontología, masterlog gráfico, geosteering, geomecánica. Todo eso sigue siendo 100% humano o de software especializado (SLB LithoLink, ROGII StarSteer, etc.).
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOJA 2: AHORRO ============ -->
+<section id="hoja-2">
+  <div class="sec-head">
+    <div class="sec-num alt">2</div>
+    <div>
+      <h2 class="sec-title">El <em>cálculo de ahorro</em> por cabina</h2>
+      <div class="sec-sub">Cifras conservadoras, con datos verificables del mercado mexicano y benchmarks públicos.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Hoja 2</div>
+
+    <div class="roi-hero">
+      <div class="lbl">Ahorro neto por cabina, por mes</div>
+      <div class="big"><em>~$12,000</em> USD</div>
+      <div class="sub">Equivalente a <strong>240 horas-hombre liberadas</strong> y <strong>$103,000 MXN</strong> en valor de tiempo recuperado, contra un costo del SaaS de $50,000 MXN/mes.</div>
+    </div>
+
+    <div class="roi-grid">
+      <div class="roi-cell"><div class="v">240h</div><div class="l">Horas-hombre/mes liberadas</div></div>
+      <div class="roi-cell"><div class="v">$103K</div><div class="l">MXN/mes en valor del tiempo</div></div>
+      <div class="roi-cell"><div class="v">$50K</div><div class="l">MXN/mes costo del SaaS</div></div>
+      <div class="roi-cell"><div class="v accent">~2×</div><div class="l">ROI conservador en personal</div></div>
+    </div>
+
+    <div class="roi-detail">
+      <div>
+        <h4>Costo actual por cabina</h4>
+        <ul>
+          <li>Geólogos Pemex (4 pers) <strong>$180-250K MXN</strong></li>
+          <li>Geólogos con prestaciones <strong>$240-320K MXN</strong></li>
+          <li>Auxiliares de lavado (2 pers) <strong>$30-50K MXN</strong></li>
+          <li>Horas dedicadas a SIOP+REPORTE <strong>2-4 h/día</strong></li>
+          <li>Total horas-hombre/mes <strong>240 horas</strong></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Benchmarks del mercado</h4>
+        <ul>
+          <li>IDS Energistics 2017 <strong>1-3 h/día</strong></li>
+          <li>Intelie Auto DDR <strong>horas → minutos</strong></li>
+          <li>Kwantis 2025 <strong>90% auto-poblado</strong></li>
+          <li>Provectus 2025 <strong>$4.2M USD ahorrados</strong></li>
+          <li>SLB SPE-209894 <strong>Reducción drástica</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="roi-bench">
+      <div class="bench-row">
+        <div class="bench-label"><span><strong>Personal</strong> · 4 geólogos por cabina</span><span>$320K MXN</span></div>
+        <div class="bench-track"><div class="bench-fill" style="width:100%;background:var(--primary)">100%</div></div>
+      </div>
+      <div class="bench-row">
+        <div class="bench-label"><span><strong>SIOP+REPORTE</strong> · 240 h/mes</span><span>$103K MXN</span></div>
+        <div class="bench-track"><div class="bench-fill" style="width:32%;background:var(--accent)">32%</div></div>
+      </div>
+      <div class="bench-row">
+        <div class="bench-label"><span><strong>SaaS mensual</strong> · propuesta</span><span>$50K MXN</span></div>
+        <div class="bench-track"><div class="bench-fill" style="width:16%;background:var(--muted)">16%</div></div>
+      </div>
+      <div class="bench-row">
+        <div class="bench-label"><span><strong>Ahorro neto</strong> · primer mes</span><span class="accent" style="color:var(--accent)"><strong>+$11.9K MXN</strong></span></div>
+        <div class="bench-track"><div class="bench-fill" style="width:4%;background:var(--primary)"></div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding:18px 22px;background:linear-gradient(135deg,rgba(176,138,62,.06),transparent);border:1px solid rgba(176,138,62,.25);border-radius:12px;display:flex;gap:16px;align-items:flex-start">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex-shrink:0;margin-top:2px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <div>
+        <strong style="font-family:'Outfit',sans-serif;font-weight:600;color:var(--ink);font-size:14px;display:block;margin-bottom:4px">El argumento que vale más que el personal</strong>
+        <p style="margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.55">Provectus (2025) demostró que un cliente operador con IA sobre DDRs históricos detectó <strong>7% de NPT que no había sido reportado en los DDRs originales</strong>, ahorrando <strong>$4.2M USD en una campaña de 100 pozos</strong>. Un solo evento así en un año vale 10× el costo del SaaS.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOJA 3: ALIANZA ============ -->
+<section id="hoja-3">
+  <div class="sec-head">
+    <div class="sec-num">3</div>
+    <div>
+      <h2 class="sec-title">El modelo de <em>colaboración</em></h2>
+      <div class="sec-sub">Revenue share 60/40, sin equity. Cero riesgo para las dos partes.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Hoja 3</div>
+
+    <div class="alianza-grid">
+
+      <div class="alianza recomendada">
+        <div class="badge">Revenue share · sin equity</div>
+        <h3>Alianza 60/40</h3>
+        <div class="sub">Aportamos cada uno lo que mejor sabe hacer</div>
+        <p class="quote">"Si funciona, ganamos los dos. Si no, no perdimos nada."</p>
+        <table>
+          <tr><th>Qué aporto</th><td><b>Tecnología, modelos, operación, roadmap, propiedad intelectual del software.</b></td></tr>
+          <tr><th>Qué aporta él</th><td><b>Acceso a cabinas, datos históricos, geólogos de contraparte, venta y relación con Pemex.</b></td></tr>
+          <tr><th>Ingresos</th><td>60% del fee mensual va al producto · 40% a la operación comercial.</td></tr>
+          <tr><th>Inversión inicial</th><td>$0 de ambas partes.</td></tr>
+          <tr><th>Exclusividad</th><td>Exclusividad territorial en Sureste por 24 meses.</td></tr>
+          <tr><th>Salida</th><td>Cualquiera puede salir con 90 días. <b>Sin penalización, sin lock-up, sin transferencia de IP.</b></td></tr>
+          <tr><th>Propiedad IP</th><td><b>Se queda 100% del lado del producto.</b> Tu empresa no toca propiedad intelectual ajena.</td></tr>
+          <tr><th>Decisión técnica</th><td>Producto decide roadmap. <b>Comercial no tiene voto en qué se construye.</b></td></tr>
+        </table>
+        <div class="cuando">
+          <strong>Por qué revenue share y no equity</strong>
+          Tres razones concretas. (1) La sociedad anterior que tuviste no funcionó — esta estructura no ata a nadie, así que si algo no cuadra, te sales con 90 días y sigues operando. (2) El SaaS no necesita tu capital para arrancar; necesita tus cabinas y tus datos, que es lo que el revenue share te paga. (3) Mantienes control total sobre tu empresa. Yo asumo el riesgo técnico, tú el comercial. Si la tecnología no funciona, es problema mío, no tuyo.
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:24px;padding:16px 20px;background:var(--primary-soft);border-radius:10px;font-size:13.5px;color:var(--ink-2);line-height:1.6">
+      <strong style="color:var(--primary);font-family:'Outfit',sans-serif;font-weight:600;display:block;margin-bottom:4px">Mi compromiso:</strong>
+      El primer piloto de 30 días corre sin costo. Si en 30 días los números no son los que prometí, no hay contrato ni obligación. La decisión de seguir es tuya, basada en datos reales de tu propia cabina, no en una presentación.
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOJA 4: APERTURA ============ -->
+<section id="hoja-4">
+  <div class="sec-head">
+    <div class="sec-num alt">4</div>
+    <div>
+      <h2 class="sec-title">La <em>apertura</em> para la reunión</h2>
+      <div class="sec-sub">Una frase que abre la puerta, con variantes según cómo responda.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Hoja 4</div>
+
+    <div class="speech">
+      <div class="pre">Lo que dices, textual</div>
+      <p><span class="hl">"Te propongo un piloto de 30 días sin costo,</span> medimos el ahorro real en una de tus cabinas, y si los números salen, platicamos de cómo lo hacemos juntos. Hay una estructura que estoy seguro te va a gustar."</p>
+      <div class="alts">
+        <strong>Variantes según cómo responda</strong>
+        <div class="alt"><em>Si dice "¿qué es exactamente?":</em> "Es un software que toma los datos que la cabina ya captura y genera el SIOP, el reporte diario y las alertas de manifestación en automático. No reemplaza al geólogo, solo le ahorra 4-6 horas al día de paperwork."</div>
+        <div class="alt"><em>Si dice "¿cuánto cuesta?":</em> "El piloto es gratis. Si funciona, el fee mensual está en el rango de $30-70 mil pesos por cabina, contra los $200-300 mil que cuesta hoy el tiempo geológico que se va en reportes."</div>
+        <div class="alt"><em>Si dice "¿y si funciona y quieren venir a más clientes?":</em> "Justo para eso propongo una alianza de revenue share. Tú traes los clientes y los datos, yo pongo la tecnología. 60/40 a favor del producto."</div>
+        <div class="alt"><em>Si dice "déjame pensarlo":</em> "Perfecto. Te dejo el one-pager y nos hablamos en una semana. Mientras tanto, ¿puedo ver una cabina tuya funcionando 30 días en modo sombra, solo para que veas los datos que vamos a usar?"</div>
+      </div>
+    </div>
+
+    <div class="do-dont">
+      <div class="do">
+        <h4>✓ Lo que sí hacer en la reunión</h4>
+        <ul>
+          <li>Llegar con los 4 números del ahorro memorizados.</li>
+          <li>Empezar con el piloto de 30 días, no con el producto.</li>
+          <li>Hablar de 1 cabina primero, no de 10.</li>
+          <li>Mencionar que no reemplaza al geólogo.</li>
+          <li>Usar el nombre del pozo de su propia operación como ejemplo.</li>
+          <li>Cerrar con un compromiso pequeño, no con un contrato.</li>
+        </ul>
+      </div>
+      <div class="dont">
+        <h4>✗ Lo que NO hacer</h4>
+        <ul>
+          <li>Prometer que la IA interpreta litología (no en v1).</li>
+          <li>Hablar de "transformación digital" o "disrupción".</li>
+          <li>Mencionar a Halliburton o SLB como competencia (no lo son para él).</li>
+          <li>Pedir un contrato de 12 meses antes del piloto.</li>
+          <li>Ofrecer precio por debajo de $30K MXN/mes (sospechoso barato).</li>
+          <li>Hablar más de 30 minutos sin hacer una pregunta.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CLOSER ============ -->
+<div class="closer">
+  <div class="pre">Próximo paso</div>
+  <h2>Imprime estas <em>cuatro hojas</em> y llega a la reunión listo.</h2>
+  <p>No necesitas saber más. Con los 4 servicios, los 4 números del ahorro, el modelo de alianza y la apertura, tienes cubierto el 90% de lo que te van a preguntar.</p>
+  <div class="sig">Cabinas geológicas · propuesta v1 · septiembre 2026</div>
+</div>
+
+</div>
+</body>
+</html>

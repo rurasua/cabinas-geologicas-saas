@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Matriz de cumplimiento · Pliego Pemex ↔ SaaS Cabinas Geológicas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5f0;
+    --surface:#ffffff;
+    --line:#e9e3d6;
+    --line-soft:#f0ebde;
+    --ink:#14171e;
+    --ink-2:#3a4256;
+    --muted:#7c7a72;
+    --primary:#2f6f5e;
+    --primary-deep:#1d4a3d;
+    --primary-soft:rgba(47,111,94,.08);
+    --accent:#c97b3f;
+    --accent-soft:rgba(201,123,63,.08);
+    --warn:#b06367;
+    --warn-soft:rgba(176,99,103,.08);
+    --info:#3d6a8c;
+    --info-soft:rgba(61,106,140,.08);
+    --gray:#9a958a;
+    --gray-soft:rgba(154,149,138,.1);
+    --shadow:0 2px 8px rgba(0,0,0,.04);
+    --shadow-lg:0 4px 16px -2px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  body{background-image:radial-gradient(circle at 0% 0%,rgba(201,123,63,.05),transparent 40%),radial-gradient(circle at 100% 100%,rgba(47,111,94,.05),transparent 40%);min-height:100vh}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+
+  /* Topbar */
+  .toolbar{position:sticky;top:0;background:var(--bg);padding:16px 0 14px;border-bottom:1px solid var(--line);margin:-48px -28px 40px;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+  .toolbar .brand{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .toolbar button{background:var(--ink);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s}
+  .toolbar button:hover{background:var(--primary)}
+  .toolbar button svg{width:14px;height:14px}
+
+  /* Hero */
+  .hero{text-align:center;padding:24px 0 40px;position:relative}
+  .hero .pre{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:10px}
+  .hero .pre .line{width:30px;height:1px;background:var(--accent);opacity:.6}
+  .hero h1{font-family:'DM Serif Display',serif;font-weight:400;font-size:48px;line-height:1.05;letter-spacing:-.012em;margin:0 0 18px;color:var(--ink);max-width:880px;margin-left:auto;margin-right:auto}
+  .hero h1 em{font-style:italic;color:var(--primary)}
+  .hero .lede{font-size:17px;line-height:1.5;color:var(--ink-2);max-width:760px;margin:0 auto 32px}
+  .hero .src{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;color:var(--muted);margin-top:6px}
+
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 auto 12px;max-width:880px}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 18px;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary)}
+  .kpi.alt::before{background:var(--accent)}
+  .kpi.warn::before{background:var(--warn)}
+  .kpi.info::before{background:var(--info)}
+  .kpi .v{font-family:'DM Serif Display',serif;font-size:38px;line-height:1;margin-bottom:6px;color:var(--primary)}
+  .kpi.alt .v{color:var(--accent)}
+  .kpi.warn .v{color:var(--warn)}
+  .kpi.info .v{color:var(--info)}
+  .kpi .v small{font-size:18px;color:var(--muted)}
+  .kpi .l{font-size:12px;color:var(--ink-2);line-height:1.35}
+
+  /* Section */
+  section{scroll-margin-top:80px;margin-top:56px}
+  .sec-head{display:flex;align-items:center;gap:18px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .sec-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:#fff;background:var(--primary);padding:6px 12px;border-radius:6px;letter-spacing:.04em}
+  .sec-num.alt{background:var(--accent)}
+  .sec-num.info{background:var(--info)}
+  .sec-title{font-family:'DM Serif Display',serif;font-weight:400;font-size:28px;line-height:1.1;color:var(--ink);margin:0;letter-spacing:-.005em}
+  .sec-title em{font-style:italic;color:var(--primary)}
+  .sec-sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+
+  /* Sheet */
+  .sheet{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px 36px;box-shadow:var(--shadow);margin-bottom:28px;position:relative;page-break-after:always}
+  .sheet-label{position:absolute;top:-10px;left:24px;background:var(--accent);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;padding:3px 10px;border-radius:4px;text-transform:uppercase}
+
+  /* Compliance table */
+  .ctable{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+  .ctable thead th{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:10px 14px;text-align:left;border-bottom:2px solid var(--line);background:var(--bg);position:sticky;top:0}
+  .ctable thead th:first-child{border-radius:8px 0 0 8px}
+  .ctable thead th:last-child{border-radius:0 8px 8px 0}
+  .ctable tbody td{padding:14px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+  .ctable tbody tr:last-child td{border-bottom:none}
+  .ctable tbody tr:hover{background:rgba(47,111,94,.02)}
+  .ctable .req{font-weight:500;color:var(--ink);font-size:14px;display:block;margin-bottom:2px}
+  .ctable .req .ref{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);font-weight:400;margin-left:6px}
+  .ctable .desc{font-size:12.5px;color:var(--ink-2);line-height:1.45}
+  .ctable .col-req{width:36%}
+  .ctable .col-status{width:14%;text-align:center}
+  .ctable .col-notes{width:50%}
+
+  /* Status badges */
+  .sb{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-family:'Outfit',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+  .sb svg{width:12px;height:12px;stroke-width:3;flex-shrink:0}
+  .sb.ok{background:var(--primary);color:#fff}
+  .sb.partial{background:var(--accent);color:#fff}
+  .sb.roadmap{background:var(--info);color:#fff}
+  .sb.na{background:var(--gray);color:#fff}
+  .sb.muted{background:var(--line-soft);color:var(--muted);border:1px solid var(--line)}
+
+  /* Personal cards */
+  .personas{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px}
+  .persona{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;position:relative}
+  .persona .role{font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:6px}
+  .persona h4{font-family:'DM Serif Display',serif;font-weight:400;font-size:20px;margin:0 0 8px;color:var(--ink);line-height:1.15}
+  .persona .count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:10px}
+  .persona .saas{font-size:13px;color:var(--ink-2);line-height:1.5;padding:10px 12px;background:var(--primary-soft);border-radius:8px}
+  .persona .saas strong{color:var(--primary)}
+
+  /* Plan timeline */
+  .timeline{margin-top:8px;position:relative}
+  .timeline::before{content:"";position:absolute;left:18px;top:18px;bottom:18px;width:2px;background:var(--line)}
+  .phase{position:relative;padding-left:54px;margin-bottom:18px}
+  .phase:last-child{margin-bottom:0}
+  .phase::before{content:"";position:absolute;left:11px;top:6px;width:16px;height:16px;border-radius:50%;background:var(--surface);border:3px solid var(--primary);z-index:2}
+  .phase h4{font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;margin:0 0 4px;color:var(--ink)}
+  .phase .when{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.04em;margin-bottom:6px}
+  .phase p{margin:0 0 6px;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+  .phase .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .phase .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--bg);border:1px solid var(--line);padding:3px 8px;border-radius:4px;color:var(--ink-2)}
+  .phase code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg);padding:1px 6px;border-radius:3px;color:var(--primary)}
+
+  /* Insight box */
+  .insight{margin-top:20px;padding:18px 22px;background:linear-gradient(135deg,rgba(47,111,94,.05),rgba(201,123,63,.05));border:1px solid var(--line);border-radius:12px;display:flex;gap:16px;align-items:flex-start}
+  .insight svg{width:22px;height:22px;flex-shrink:0;margin-top:2px;stroke:var(--primary);stroke-width:2;fill:none}
+  .insight .body strong{font-family:'Outfit',sans-serif;font-weight:600;color:var(--ink);font-size:14px;display:block;margin-bottom:4px}
+  .insight .body p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+
+  /* Closer */
+  .closer{margin-top:64px;padding:36px;background:var(--ink);border-radius:16px;color:#fff;text-align:center;position:relative;overflow:hidden}
+  .closer::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--primary),var(--accent),var(--primary))}
+  .closer .pre{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+  .closer h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:34px;line-height:1.15;margin:0 0 14px;max-width:760px;margin-left:auto;margin-right:auto}
+  .closer h2 em{font-style:italic;color:var(--accent)}
+  .closer p{font-size:15px;opacity:.78;max-width:640px;margin:0 auto 18px}
+  .closer .sig{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.06em;opacity:.5}
+
+  /* Print */
+  @media print{
+    body{background:#fff}
+    .toolbar{display:none}
+    .wrap{padding:0;max-width:100%}
+    .sheet{box-shadow:none;border:1px solid #ccc;page-break-after:always;margin:0 0 20px}
+    section{margin-top:0}
+  }
+  @media (max-width:780px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .personas{grid-template-columns:1fr}
+    .ctable{font-size:12.5px}
+    .ctable thead th,.ctable tbody td{padding:8px}
+    .ctable .col-req{width:42%}
+    .ctable .col-status{width:18%}
+    .ctable .col-notes{width:40%}
+    .hero h1{font-size:32px}
+    .sec-title{font-size:22px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ TOOLBAR ============ -->
+<div class="toolbar">
+  <div class="brand">MATRIZ DE CUMPLIMIENTO · PLIEGO PEMEX ↔ SAAS</div>
+  <button onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Imprimir / PDF
+  </button>
+</div>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="pre"><span class="line"></span>Matriz de cumplimiento<span class="line"></span></div>
+  <h1>Lo que pide el <em>pliego de Pemex</em>, lo que <em>el SaaS entrega</em></h1>
+  <p class="lede">Análisis punto por punto del pliego "Servicios de Operación Registro de Hidrocarburos para Pozos Marinos" contra el SaaS de Cabinas Geológicas. Cubre los reportes obligatorios, los 10 eventos geológicos inesperados que el prestador debe detectar, y el personal obligatorio por cabina.</p>
+  <div class="src">Fuente: Especificaciones Particulares y Generales B · Gerencia de Geociencias · Pemex E&amp;P</div>
+</div>
+
+<!-- ============ KPIs ============ -->
+<div class="kpis">
+  <div class="kpi">
+    <div class="v">6<small>/11</small></div>
+    <div class="l">Reportes obligatorios<br>cubiertos hoy</div>
+  </div>
+  <div class="kpi alt">
+    <div class="v">3<small>/10</small></div>
+    <div class="l">Eventos geológicos<br>automatizados</div>
+  </div>
+  <div class="kpi warn">
+    <div class="v">8<small>/10</small></div>
+    <div class="l">Eventos posibles con<br>datos WITSML actuales</div>
+  </div>
+  <div class="kpi info">
+    <div class="v">6</div>
+    <div class="l">Personas por cabina<br>apoyadas (no reemplazadas)</div>
+  </div>
+</div>
+
+<!-- ============ SECCIÓN 1: REPORTES OBLIGATORIOS ============ -->
+<section id="reportes">
+  <div class="sec-head">
+    <div class="sec-num">1</div>
+    <div>
+      <h2 class="sec-title">Reportes <em>obligatorios</em> del contrato</h2>
+      <div class="sec-sub">Documentos que el prestador DEBE entregar diariamente. El SaaS automatiza los numéricos, los interpretativos los hace el geólogo.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Sección 1</div>
+    <table class="ctable">
+      <thead>
+        <tr>
+          <th class="col-req">Requisito del pliego</th>
+          <th class="col-status">Estado</th>
+          <th class="col-notes">Cómo se cubre hoy / qué falta</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span class="req">Reporte diario operativo matutino (SIOP)<span class="ref">§1.1</span></span>
+            <span class="desc">El documento que la cabina entrega cada mañana con profundidad, metros perforados, ROP, lodo, sarta y programa.</span>
+          </td>
+          <td>
+            <span class="sb ok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              Cubre
+            </span>
+          </td>
+          <td class="desc">El motor de SIOP del SaaS lo redacta en automático desde el CSV BASE GENERAL del día y lo deja listo para la firma del geólogo. Ya probado con datos reales de Kali-10.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Reporte diario operativo de avance vespertino<span class="ref">§1.2</span></span>
+            <span class="desc">Corte vespertino del mismo día operativo, formato establecido por Pemex.</span>
+          </td>
+          <td>
+            <span class="sb ok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              Cubre
+            </span>
+          </td>
+          <td class="desc">Mismo motor que el matutino, segundo formato de salida. Sin código nuevo — solo otra plantilla.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Base de datos en profundidad<span class="ref">§1.3</span></span>
+            <span class="desc">Registros a profundidad continua, ingestados en base de datos del cliente.</span>
+          </td>
+          <td>
+            <span class="sb ok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              Cubre
+            </span>
+          </td>
+          <td class="desc">WITSML Store + Cloud Function <code>poll_witsml_data</code> ingesta cada 5 min en <code>cabins/{id}/datos_realtime/</code>. Exportable a CSV/Excel en cualquier momento.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Base general del pozo<span class="ref">§1.4</span></span>
+            <span class="desc">Tabla maestra con todos los datos de perforación por etapa y metro.</span>
+          </td>
+          <td>
+            <span class="sb ok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              Cubre
+            </span>
+          </td>
+          <td class="desc">Parser CSV BASE GENERAL ya integrado, validado contra los 3,007 registros reales de Kali-10. Estructura normalizada en <code>firestore_schema.py:normalize_lectura()</code>.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Reporte de manifestaciones de hidrocarburos<span class="ref">§1.5</span></span>
+            <span class="desc">Documento por evento, con causa, profundidad, lecturas, acción tomada y resolución.</span>
+          </td>
+          <td>
+            <span class="sb ok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              Cubre
+            </span>
+          </td>
+          <td class="desc">3 reglas activas en <code>anomaly_detector.py</code>: <code>gas_pico</code>, <code>densidad_caida</code>, <code>rop_caida</code>. Generan docs en <code>cabins/{id}/manifestaciones/</code> con shape <code>create_manifestacion_doc</code>.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Reporte de descripción de núcleo<span class="ref">§1.6</span></span>
+            <span class="desc">Descripción macroscópica de núcleos recuperados (litología, estructuras, fracturas).</span>
+          </td>
+          <td>
+            <span class="sb partial">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="13"/><line x1="12" y1="16" x2="12" y2="16.01"/></svg>
+              Parcial
+            </span>
+          </td>
+          <td class="desc">El SaaS provee la plantilla y el repositorio de fotos. La DESCRIPCIÓN es 100% humana (especialista tipo 1). No se automatiza por diseño.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Gráfica de Registro continuo de Hidrocarburos<span class="ref">§1.7</span></span>
+            <span class="desc">Masterlog con 7 pistas: ROP+gas+barrena / profundidad / litología / gas total / C1-C5 / calcimetría / solubilidad.</span>
+          </td>
+          <td>
+            <span class="sb partial">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="13"/><line x1="12" y1="16" x2="12" y2="16.01"/></svg>
+              Parcial
+            </span>
+          </td>
+          <td class="desc">Visor del SaaS ya grafica las pistas numéricas (WOB, RPM, SPP, GPM, denIn/Out, tempIn/Out, gas, c1-c5). Faltan las pistas de litología y calcimetría (geólogo + laboratorio).</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Reporte de Eventos Geológicos Inesperados<span class="ref">§1.8</span></span>
+            <span class="desc">Documento por evento, con tipo, profundidad, lecturas, acción y cierre.</span>
+          </td>
+          <td>
+            <span class="sb partial">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="13"/><line x1="12" y1="16" x2="12" y2="16.01"/></svg>
+              Parcial
+            </span>
+          </td>
+          <td class="desc">3 de 10 eventos automatizados. El resto son reglas nuevas que se pueden agregar al <code>anomaly_detector.py</code> con datos ya disponibles en WITSML (ver Sección 4).</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Litoteca digital de la columna del Pozo<span class="ref">§1.9</span></span>
+            <span class="desc">Almacén digital de muestras (fotos, pesos, intervalos) para entrega a CNH en 30 días.</span>
+          </td>
+          <td>
+            <span class="sb roadmap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+              Roadmap
+            </span>
+          </td>
+          <td class="desc">Fase 2 del SaaS. OCR + Cloud Storage + índice por intervalo. Es el Servicio #14 del MVP original (digitalizador de archivos históricos).</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Compendio paleontológico<span class="ref">§1.10</span></span>
+            <span class="desc">Estudio bioestratigráfico con foraminíferos, cimas geológicas, ambiente y edad.</span>
+          </td>
+          <td>
+            <span class="sb na">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              No aplica
+            </span>
+          </td>
+          <td class="desc">Trabajo 100% del bioestratígrafo (uno de los 2 obligatorios por cabina). El SaaS no entra en paleontología por diseño — refuerza el pitch "no reemplaza al personal".</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">Reporte de operación del cromatógrafo<span class="ref">Act. 2</span></span>
+            <span class="desc">Logs del equipo C1-C5, calibración, mantenimiento. ACTIVIDAD 2 separada.</span>
+          </td>
+          <td>
+            <span class="sb na">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              No aplica
+            </span>
+          </td>
+          <td class="desc">Es la renta y operación del equipo físico, no la interpretación. La lectura de gases sí entra en el SaaS (c1-c5 del visor).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ SECCIÓN 2: EVENTOS GEOLÓGICOS ============ -->
+<section id="eventos">
+  <div class="sec-head">
+    <div class="sec-num alt">2</div>
+    <div>
+      <h2 class="sec-title">Los <em>10 eventos geológicos</em> inesperados</h2>
+      <div class="sec-sub">Lista literal del pliego §1.5.4. Lo que el prestador debe detectar y reportar en tiempo real. El SaaS ya cubre 3, puede llegar a 8 con datos WITSML.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Sección 2</div>
+    <table class="ctable">
+      <thead>
+        <tr>
+          <th class="col-req"># Evento del pliego</th>
+          <th class="col-status">Estado</th>
+          <th class="col-notes">Cobertura actual + plan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span class="req">1. Quiebre en la velocidad de penetración</span>
+            <span class="desc">ROP cae súbitamente — posible cambio de formación, derrumbe o pérdida de barrena.</span>
+          </td>
+          <td>
+            <span class="sb ok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              Cubre
+            </span>
+          </td>
+          <td class="desc">Regla <code>rop_caida</code> en <code>anomaly_detector.py</code>. Detecta caída &gt; 40% vs promedio de 1h. Severidad warning/critical.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">2. Manifestación de hidrocarburos</span>
+            <span class="desc">Gas sube abruptamente, densidad cambia, o ambos — posible entrada de gas/aceite a la sarta.</span>
+          </td>
+          <td>
+            <span class="sb ok">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+              Cubre
+            </span>
+          </td>
+          <td class="desc">Reglas <code>gas_pico</code> y <code>densidad_caida</code>. 2 de las 3 reglas activas. Severidad crítica por defecto.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">3. Ausencia de estratos geológicos</span>
+            <span class="desc">Estratos del programa no aparecen donde se esperaban — geología distinta a la prognosis.</span>
+          </td>
+          <td>
+            <span class="sb na">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              No aplica
+            </span>
+          </td>
+          <td class="desc">Requiere correlación geológica con la prognosis del pozo. Trabajo del geólogo, no automatizable con series de tiempo.</td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">4. Presiones anormalmente altas o bajas</span>
+            <span class="desc">SPP (standpipe pressure) fuera de rango — posible problema hidráulico en fondo.</span>
+          </td>
+          <td>
+            <span class="sb roadmap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+              Roadmap
+            </span>
+          </td>
+          <td class="desc">SPP ya está en WITSML mwdRealtime. Falta regla <code>pure_detect_spp_anormal</code> (umbral absoluto + delta vs promedio). 1 día de trabajo. <strong>Semana 1 del plan.</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">5. Aumento en el volumen de presas</span>
+            <span class="desc">El lodo en presas activas sube sin explicación — posible aporte de formación o pérdida de retorno parcial.</span>
+          </td>
+          <td>
+            <span class="sb roadmap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+              Roadmap
+            </span>
+          </td>
+          <td class="desc"><code>pit_vol</code> en WITSML. Regla <code>pure_detect_pit_volume</code> (delta positivo &gt; 5% en 15 min). 1 día. <strong>Semana 1.</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">6. Cambio en la salinidad del lodo</span>
+            <span class="desc">Resistividad del lodo cambia — posible entrada de agua de formación.</span>
+          </td>
+          <td>
+            <span class="sb muted">Condicional</span>
+          </td>
+          <td class="desc">Requiere sensor de resistividad (no todas las cabinas lo tienen). Cuando esté, regla <code>pure_detect_salinidad</code>. 2-3 días. <strong>Semana 5.</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">7. Detección de derrumbes</span>
+            <span class="desc">Roca se cae a la sarta — ROP cae, torque sube, posibles emboladas.</span>
+          </td>
+          <td>
+            <span class="sb partial">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="13"/><line x1="12" y1="16" x2="12" y2="16.01"/></svg>
+              Parcial
+            </span>
+          </td>
+          <td class="desc">Parcial con <code>rop_caida</code> actual. Se puede mejorar con regla combinada <code>pure_detect_derrumbe</code> (ROP &lt; 50% + torque &gt; 150%). 1-2 días. <strong>Semana 3.</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">8. Pérdidas de lodo</span>
+            <span class="desc">SPP cae y nivel de presas cae — fluido se va a la formación.</span>
+          </td>
+          <td>
+            <span class="sb roadmap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+              Roadmap
+            </span>
+          </td>
+          <td class="desc">Regla combinada <code>pure_detect_perdida_lodo</code> (SPP drop &gt; 10% + pit_vol drop &gt; 5% simultáneos). 1 día. <strong>Semana 4.</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">9. Flujos de agua</span>
+            <span class="desc">Agua de formación entra al pozo — densidad salida baja, gas puede cambiar.</span>
+          </td>
+          <td>
+            <span class="sb roadmap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+              Roadmap
+            </span>
+          </td>
+          <td class="desc">Regla <code>pure_detect_flujo_agua</code> (den_out &lt; umbral + sin cambio de den_in). 1 día. <strong>Semana 2.</strong></td>
+        </tr>
+        <tr>
+          <td>
+            <span class="req">10. Detección de rebabas de fierro</span>
+            <span class="desc">Restos metálicos en recortes — barrena o sarta dañada.</span>
+          </td>
+          <td>
+            <span class="sb roadmap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+              Roadmap
+            </span>
+          </td>
+          <td class="desc">Regla <code>pure_detect_rebabas</code> (torque &gt; 130% + vibración high). Requiere torque + vibration en WITSML. 1-2 días. <strong>Semana 3.</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16.01"/></svg>
+      <div class="body">
+        <strong>Dato clave para el pitch</strong>
+        <p>El SaaS pasa de <strong>3 a 8 de 10 eventos automatizados</strong> con datos que ya están en WITSML (no requiere sensores nuevos). Los 2 restantes (ausencia de estratos y salinidad) son geológicos o dependen de sensor opcional. La cobertura real del SaaS queda en <strong>80% de los eventos del pliego</strong> — sin reemplazar al geólogo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECCIÓN 3: PERSONAL ============ -->
+<section id="personal">
+  <div class="sec-head">
+    <div class="sec-num info">3</div>
+    <div>
+      <h2 class="sec-title">Personal <em>obligatorio</em> que el SaaS apoya (no reemplaza)</h2>
+      <div class="sec-sub">El pliego fija 6 profesionistas por cabina. El SaaS les libera el tiempo de paperwork, no los sustituye.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Sección 3</div>
+    <div class="personas">
+      <div class="persona">
+        <div class="role">Bioestratígrafo</div>
+        <h4>Cenozoico + Mesozoico</h4>
+        <div class="count">2 personas · 3+ años exp. en foraminíferos</div>
+        <div class="saas"><strong>NO reemplaza.</strong> Su trabajo es paleontología: cimas geológicas, biocronología, paleo batimetría. El SaaS provee la plantilla del compendio y el repositorio de fósiles, pero la interpretación es 100% humana.</div>
+      </div>
+      <div class="persona">
+        <div class="role">Especialista tipo 1</div>
+        <h4>Litología + Petrografía</h4>
+        <div class="count">2 personas · 7+ años exp.</div>
+        <div class="saas"><strong>NO reemplaza.</strong> Describe muestras de canal y núcleos (Wenthworth/Dunham), interpreta registros, establece la columna geológica. El SaaS les evita el SIOP a las 3am y el paperwork de manifestaciones.</div>
+      </div>
+      <div class="persona">
+        <div class="role">Especialista tipo 2</div>
+        <h4>Columna estratigráfica</h4>
+        <div class="count">2 personas · 2+ años exp.</div>
+        <div class="saas"><strong>NO reemplaza.</strong> Apoya en descripción de muestras, columna estratigráfica y calibración de sensores. Recibe la mayor descarga de paperwork (SIOPs vespertinos, manifests) — el SaaS es su mayor aliado.</div>
+      </div>
+    </div>
+
+    <div class="insight" style="margin-top:24px">
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <div class="body">
+        <strong>Lectura de negocio</strong>
+        <p>El SaaS <strong>no entra en el headcount obligatorio</strong>: el cliente SIGUE necesitando sus 6 personas por cabina. Lo que cambia es el mix de lo que hacen: <strong>30-40% menos paperwork, 100% de su expertise geológica intacta</strong>. Esto se traduce en que el mismo equipo puede operar 2 cabinas, o atender la misma cabina con margen para imprevistos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECCIÓN 4: PLAN DE CIERRE ============ -->
+<section id="plan">
+  <div class="sec-head">
+    <div class="sec-num">4</div>
+    <div>
+      <h2 class="sec-title">Plan de <em>cierre de gaps</em> · 5 semanas</h2>
+      <div class="sec-sub">Lo que hay que tocar para llegar al 80% de eventos automatizados. Sin sensores nuevos, solo código + datos que ya están en WITSML.</div>
+    </div>
+  </div>
+
+  <div class="sheet">
+    <div class="sheet-label">Sección 4</div>
+    <div class="timeline">
+      <div class="phase">
+        <h4>Reglas SPP + Pit Volume (presiones + presas)</h4>
+        <div class="when">Semana 1 · 3-4 días</div>
+        <p>Cubre <strong>eventos #4 y #5</strong> del pliego. SPP y <code>pit_vol</code> ya están en WITSML mwdRealtime. Se agregan 2 funciones puras <code>pure_detect_spp_anormal</code> (umbral absoluto + delta vs ventana 30 min) y <code>pure_detect_pit_volume</code> (delta &gt; 5% en 15 min). Se enchufan al orquestador <code>pure_detect_todas</code>.</p>
+        <div class="tags">
+          <span class="tag">anomaly_detector.py</span>
+          <span class="tag">+2 reglas</span>
+          <span class="tag">+6 tests</span>
+        </div>
+      </div>
+      <div class="phase">
+        <h4>Regla de flujo de agua</h4>
+        <div class="when">Semana 2 · 1 día</div>
+        <p>Cubre <strong>evento #9</strong>. <code>pure_detect_flujo_agua</code>: detecta cuando <code>den_out</code> cae bajo umbral histórico <strong>sin</strong> que <code>den_in</code> cambie (señal de entrada de fluido de formación). Ya tenemos <code>den_in</code> y <code>den_out</code> en WITSML.</p>
+        <div class="tags">
+          <span class="tag">+1 regla</span>
+          <span class="tag">+3 tests</span>
+        </div>
+      </div>
+      <div class="phase">
+        <h4>Reglas de derrumbe y rebabas (torque + vibración)</h4>
+        <div class="when">Semana 3 · 2-3 días</div>
+        <p>Cubre <strong>eventos #7 y #10</strong>. <code>pure_detect_derrumbe</code> (ROP &lt; 50% + torque &gt; 150%) y <code>pure_detect_rebabas</code> (torque &gt; 130% + vibración high). Requiere agregar <code>torque</code> y <code>vibration</code> al <code>PARAM_DATA_ITEMS</code> de <code>WitsmlClient</code> y a <code>normalize_lectura</code>.</p>
+        <div class="tags">
+          <span class="tag">witsml_client.py</span>
+          <span class="tag">firestore_schema.py</span>
+          <span class="tag">+2 reglas</span>
+          <span class="tag">+6 tests</span>
+        </div>
+      </div>
+      <div class="phase">
+        <h4>Regla de pérdida de lodo (combinada)</h4>
+        <div class="when">Semana 4 · 1 día</div>
+        <p>Cubre <strong>evento #8</strong>. <code>pure_detect_perdida_lodo</code>: trigger cuando <code>spp</code> cae &gt; 10% <strong>y</strong> <code>pit_vol</code> cae &gt; 5% en la misma ventana. Es la primera regla combinada del sistema — abre el patrón para futuras reglas multi-sensor.</p>
+        <div class="tags">
+          <span class="tag">+1 regla combinada</span>
+          <span class="tag">+3 tests</span>
+        </div>
+      </div>
+      <div class="phase">
+        <h4>Regla de salinidad (condicional al sensor)</h4>
+        <div class="when">Semana 5 · 2-3 días</div>
+        <p>Cubre <strong>evento #6</strong> solo en cabinas con sensor de resistividad. <code>pure_detect_salinidad</code>: cambio &gt; 15% en <code>resistivity</code> en 30 min. Se enchufa con un check defensivo — si el sensor no está disponible, la regla se desactiva sola sin afectar el resto.</p>
+        <div class="tags">
+          <span class="tag">+1 regla condicional</span>
+          <span class="tag">+3 tests</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight" style="margin-top:24px">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div class="body">
+        <strong>Resumen del plan</strong>
+        <p>5 semanas calendario (trabajando a tiempo parcial) = <strong>+7 reglas de detección</strong> que suben la cobertura de eventos del pliego de <strong>3/10 a 8/10</strong>. Costo de infraestructura: $0 adicional (los datos ya están en WITSML). Costo de desarrollo: parametrización de <code>anomaly_detector.py</code> con sus tests, sin tocar la arquitectura. El 9° evento (ausencia de estratos) queda fuera por diseño — es trabajo geológico de interpretación.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CLOSER ============ -->
+<div class="closer">
+  <div class="pre">Conclusión</div>
+  <h2>El SaaS no compite con el pliego. <em>Lo complementa.</em></h2>
+  <p>El 55% de los reportes obligatorios ya están automatizados. El 80% de los eventos geológicos inesperados se pueden automatizar en 5 semanas con datos ya disponibles. Y los 6 profesionistas obligatorios por cabina siguen siendo obligatorios — solo que con el paperwork resuelto en automático.</p>
+  <div class="sig">Matriz de cumplimiento · Cabinas geológicas SaaS · septiembre 2026</div>
+</div>
+
+</div>
+</body>
+</html>

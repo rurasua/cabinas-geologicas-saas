@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cabinas Geológicas — Guía completa del MVP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5f0;
+    --surface:#ffffff;
+    --line:#e9e3d6;
+    --line-soft:#f0ebde;
+    --ink:#14171e;
+    --ink-2:#3a4256;
+    --muted:#7c7a72;
+    --primary:#2f6f5e;
+    --primary-soft:rgba(47,111,94,.08);
+    --accent:#c97b3f;
+    --warn:#b06367;
+    --shadow:0 2px 8px rgba(0,0,0,.04);
+    --shadow-lg:0 4px 16px -2px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Outfit',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  body{background-image:radial-gradient(circle at 0% 0%,rgba(201,123,63,.05),transparent 40%),radial-gradient(circle at 100% 100%,rgba(47,111,94,.05),transparent 40%);min-height:100vh}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 24px 96px}
+  nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:48px;box-shadow:var(--shadow)}
+  nav.toc h3{font-family:'DM Serif Display',serif;font-size:14px;font-weight:400;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px}
+  nav.toc ol{list-style:none;padding:0;margin:0;columns:2;column-gap:32px}
+  nav.toc li{padding:4px 0;break-inside:avoid}
+  nav.toc a{color:var(--ink-2);text-decoration:none;font-size:14px;border-bottom:1px dashed transparent;transition:all .15s}
+  nav.toc a:hover{color:var(--primary);border-bottom-color:var(--primary)}
+  nav.toc a .n{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;margin-right:6px}
+
+  .hero{padding:32px 0 56px}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(201,123,63,.18)}
+  h1{font-family:'DM Serif Display',serif;font-weight:400;font-size:46px;line-height:1.1;letter-spacing:-.01em;margin:0 0 18px;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--primary)}
+  .lede{font-size:18px;line-height:1.55;color:var(--ink-2);max-width:720px;margin:0 0 28px}
+  .lede strong{color:var(--ink);font-weight:600}
+  .hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px}
+  .hero-stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+  .hero-stat .v{font-family:'DM Serif Display',serif;font-size:28px;color:var(--primary);line-height:1;margin-bottom:6px}
+  .hero-stat .l{font-size:12px;color:var(--muted);line-height:1.4}
+
+  section{margin-top:80px;scroll-margin-top:24px}
+  h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:30px;line-height:1.2;letter-spacing:-.005em;margin:0 0 8px;color:var(--ink);display:flex;align-items:center;gap:12px}
+  h2 .num{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);background:var(--primary-soft);padding:4px 10px;border-radius:6px;letter-spacing:0}
+  h3{font-family:'DM Serif Display',serif;font-weight:400;font-size:20px;line-height:1.3;margin:24px 0 10px;color:var(--ink-2)}
+  p{margin:0 0 14px}
+  .lead{font-size:16px;color:var(--ink-2);max-width:740px;margin-bottom:24px}
+
+  /* Glosarios */
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);transition:all .2s}
+  .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--primary)}
+  .card .term{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--primary);font-weight:500;margin-bottom:4px}
+  .card .abbr{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);background:rgba(201,123,63,.08);padding:2px 6px;border-radius:4px;display:inline-block;margin-bottom:8px}
+  .card .def{font-size:14px;color:var(--ink-2);line-height:1.5}
+  .card .def em{color:var(--ink);font-style:normal;font-weight:500}
+  .card .def .en{color:var(--muted);font-style:italic;font-size:13px}
+
+  /* Servicios */
+  .service{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 28px;margin-bottom:18px;box-shadow:var(--shadow);position:relative;transition:all .2s}
+  .service:hover{box-shadow:var(--shadow-lg);border-color:var(--primary)}
+  .service-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:14px}
+  .service-num{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--primary);color:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+  .service-title{flex:1}
+  .service-title h3{margin:0 0 4px;font-size:20px;color:var(--ink)}
+  .service-title .en{font-size:13px;color:var(--muted);font-style:italic}
+  .service-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .tag{font-size:11px;padding:3px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+  .tag-manual{background:rgba(176,99,103,.1);color:var(--warn)}
+  .tag-sensor{background:rgba(47,111,94,.1);color:var(--primary)}
+  .tag-software{background:rgba(59,130,246,.1);color:#3b82f6}
+  .tag-experto{background:rgba(124,122,114,.1);color:var(--muted)}
+  .service p{font-size:14.5px;color:var(--ink-2);margin-bottom:10px}
+  .service .does{font-size:14px;color:var(--ink-2);margin-bottom:8px}
+  .service .does strong{color:var(--ink);font-weight:600}
+  .service .entrega{background:var(--bg);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 8px 8px 0;font-size:13.5px;color:var(--ink-2);margin-top:10px}
+  .service .entrega strong{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:12px;display:block;margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+  .service .donde{font-size:13px;color:var(--muted);margin-top:10px;display:flex;align-items:center;gap:6px}
+  .service .donde svg{flex-shrink:0;opacity:.6}
+
+  /* Arquitectura */
+  .arch{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px;box-shadow:var(--shadow);margin:24px 0}
+  .arch svg{width:100%;height:auto;display:block}
+
+  /* Stack */
+  .stack-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin:24px 0}
+  .stack-cell{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+  .stack-cell h4{margin:0 0 4px;font-size:14px;color:var(--primary);font-family:'Outfit',sans-serif;font-weight:600;letter-spacing:.02em}
+  .stack-cell .stack-desc{font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-bottom:8px}
+  .stack-cell ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-2)}
+  .stack-cell li{margin-bottom:2px}
+
+  /* Roadmap */
+  .roadmap{position:relative;padding-left:36px;margin:24px 0}
+  .roadmap::before{content:"";position:absolute;left:12px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--primary) 0%,var(--accent) 100%);opacity:.4}
+  .rm-item{position:relative;padding-bottom:32px}
+  .rm-item::before{content:"";position:absolute;left:-29px;top:6px;width:18px;height:18px;border-radius:50%;background:var(--surface);border:3px solid var(--primary);box-shadow:0 0 0 4px var(--bg)}
+  .rm-item.f1::before{border-color:var(--primary)}
+  .rm-item.f2::before{border-color:#a8b89a}
+  .rm-item.f3::before{border-color:var(--accent)}
+  .rm-item h4{margin:0 0 4px;font-family:'Outfit',sans-serif;font-weight:600;font-size:16px;color:var(--ink)}
+  .rm-item .dur{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--primary-soft);padding:2px 8px;border-radius:4px;display:inline-block;margin-bottom:8px;letter-spacing:.04em}
+  .rm-item p{font-size:14px;color:var(--ink-2);margin:0}
+  .rm-item ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink-2)}
+  .rm-item li{margin-bottom:2px}
+
+  /* Numeritos */
+  .roi-box{background:var(--surface);border:2px solid var(--primary);border-radius:14px;padding:24px;margin:24px 0;box-shadow:var(--shadow-lg)}
+  .roi-box .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+  .roi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:12px}
+  .roi-cell{text-align:center}
+  .roi-cell .v{font-family:'DM Serif Display',serif;font-size:32px;color:var(--primary);line-height:1;margin-bottom:4px}
+  .roi-cell .v.accent{color:var(--accent)}
+  .roi-cell .v.warn{color:var(--warn)}
+  .roi-cell .l{font-size:12px;color:var(--ink-2);line-height:1.3}
+
+  /* Quote */
+  blockquote{margin:24px 0;padding:20px 24px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;box-shadow:var(--shadow);font-family:'DM Serif Display',serif;font-size:18px;line-height:1.5;color:var(--ink);font-style:italic}
+  blockquote cite{display:block;margin-top:8px;font-family:'Outfit',sans-serif;font-style:normal;font-size:13px;color:var(--muted)}
+
+  /* Callout */
+  .callout{background:rgba(201,123,63,.08);border:1px solid rgba(201,123,63,.3);border-radius:12px;padding:16px 20px;margin:20px 0;font-size:14px;color:var(--ink-2)}
+  .callout strong{color:var(--accent);display:flex;align-items:center;gap:8px}
+  .callout strong svg{flex-shrink:0}
+
+  footer{margin-top:96px;padding-top:32px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);text-align:center}
+
+  @media (max-width:780px){
+    .grid-3,.grid-2{grid-template-columns:1fr}
+    .stack-row{grid-template-columns:1fr 1fr}
+    .roi-grid{grid-template-columns:repeat(2,1fr)}
+    .hero-grid{grid-template-columns:1fr}
+    h1{font-size:34px}
+    h2{font-size:24px}
+    nav.toc ol{columns:1}
+    .service{padding:18px 20px}
+    .service-head{flex-direction:column;gap:10px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="eyebrow"><span class="dot"></span>Guía de alcance · MVP v1</div>
+  <h1>Cabinas geológicas para <em>pozos petroleros</em>: qué vamos a construir, servicio por servicio.</h1>
+  <p class="lede">Esta página es tu manual personal. Te explica <strong>los 14 servicios que existen en una cabina geológica</strong>, qué hace cada uno, qué abreviatura usa la industria, qué entregable produce, y cuál de ellos vamos a automatizar primero. Empieza por la tabla de contenido y baja hasta donde te interesse.</p>
+  <div class="hero-grid">
+    <div class="hero-stat"><div class="v">14</div><div class="l">Servicios que ofrece una cabina geológica moderna</div></div>
+    <div class="hero-stat"><div class="v">4</div><div class="l">Servicios que el MVP va a automatizar primero</div></div>
+    <div class="hero-stat"><div class="v">~3×</div><div class="l">Retorno estimado por cada peso invertido por el cliente</div></div>
+  </div>
+</div>
+
+<nav class="toc">
+  <h3>Tabla de contenido</h3>
+  <ol>
+    <li><a href="#glosario"><span class="n">01</span>Glosario de términos</a></li>
+    <li><a href="#abrev"><span class="n">02</span>Abreviaturas de la industria</a></li>
+    <li><a href="#servicios"><span class="n">03</span>Los 14 servicios, uno por uno</a></li>
+    <li><a href="#mvp"><span class="n">04</span>Qué hace el MVP (alcance)</a></li>
+    <li><a href="#arq"><span class="n">05</span>Arquitectura técnica</a></li>
+    <li><a href="#stack"><span class="n">06</span>Stack tecnológico</a></li>
+    <li><a href="#roadmap"><span class="n">07</span>Roadmap de 6 meses</a></li>
+    <li><a href="#roi"><span class="n">08</span>Lo que ahorra el cliente</a></li>
+    <li><a href="#riesgos"><span class="n">09</span>Riesgos y mitigaciones</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 01 GLOSARIO ============ -->
+<section id="glosario">
+  <h2><span class="num">01</span>Glosario de términos</h2>
+  <p class="lead">Lo mínimo que necesitas entender antes de hablar de cabinas geológicas. Cada tarjeta tiene el término en español, su nombre en inglés, y una explicación que puedas repetir en una reunión.</p>
+  <div class="grid-3">
+    <div class="card">
+      <div class="term">Pozo petrolero</div>
+      <div class="def">Un hoyo que se perfora en la tierra para sacar petróleo o gas. <em>Pozo = well</em>. Tiene entre 1 000 y 7 000 metros de profundidad, y se perfora por etapas (<em>stages</em>), cada una con un diámetro menor que la anterior.</div>
+    </div>
+    <div class="card">
+      <div class="term">Cabina geológica</div>
+      <div class="def">Una caseta móvil instalada junto al equipo de perforación. Es donde trabaja el equipo de geólogos y donde llegan los datos en tiempo real. <em>Mud logging unit</em> en inglés. Certificada DNV 2.7-1 para alta mar.</div>
+    </div>
+    <div class="card">
+      <div class="term">Cuttings (ripios)</div>
+      <div class="def">Pedacitos de roca que la broca粉碎 al perforar. Viajen del fondo del pozo hasta la superficie mezclados con el lodo. El geólogo los analiza bajo el microscopio para saber qué roca se está atravesando.</div>
+    </div>
+    <div class="card">
+      <div class="term">Lodo de perforación</div>
+      <div class="def">Un líquido espeso (parecido a lodo real) que circula por el pozo. Tres funciones: enfriar la broca, traer los cuttings a la superficie, y mantener la presión del pozo estable. <em>Drilling mud / drilling fluid</em>.</div>
+    </div>
+    <div class="card">
+      <div class="term">Manifestación (kick)</div>
+      <div class="def">Cuando los hidrocarburos del subsuelo entran al pozo de manera no controlada. Es una emergencia operacional. El equipo tiene que detectarla rápido cerrando preventores y aumentando la densidad del lodo.</div>
+    </div>
+    <div class="card">
+      <div class="term">ROP</div>
+      <div class="def"><em>Rate of Penetration</em>. Qué tan rápido avanza la broca, medido en metros por hora. Cuando el ROP sube de golpe, suele significar que se cambió de formación rocosa (se entró a una arena porosa, por ejemplo).</div>
+    </div>
+    <div class="card">
+      <div class="term">Brot</div>
+      <div class="abbr">BNA</div>
+      <div class="def">La herramienta de corte al final de la sarta de perforación. Es la que efectivamente rompe la roca. <em>Bit</em> en inglés. Hay de dos tipos: PDC (diamante sintético) y tricónica (dientes de acero).</div>
+    </div>
+    <div class="card">
+      <div class="term">Sarta de perforación</div>
+      <div class="def">La columna de tubos que conecta la broca con el equipo en superficie. Incluye la broca, los <em>drill collars</em> (pesados), la <em>HWDP</em> (tubos pesados), y los tubos de perforación. <em>Drill string / BHA</em>.</div>
+    </div>
+    <div class="card">
+      <div class="term">Formación</div>
+      <div class="def">Una capa de roca con características geológicas reconocibles. Los geólogos las clasifican por edad (Cretácico, Jurásico, Mioceno) y por tipo (lutita, arenisca, caliza). Un pozo puede atravesar 10+ formaciones.</div>
+    </div>
+    <div class="card">
+      <div class="term">Litología</div>
+      <div class="def">La descripción de qué tipo de roca hay a cada profundidad. Es el trabajo principal del geólogo de cabina. <em>Lithology</em> en inglés.</div>
+    </div>
+    <div class="card">
+      <div class="term">Gas en el lodo</div>
+      <div class="def">Hidrocarburos gaseosos (metano, etano, propano) que se mezclan con el lodo cuando se perfora una zona con petróleo. Se mide con un cromatógrafo. <em>Mud gas</em>.</div>
+    </div>
+    <div class="card">
+      <div class="term">Registro geofísico</div>
+      <div class="def">Mediciones eléctricas, acústicas y radioactivas que se hacen dentro del pozo con herramientas especiales. Sirven para identificar las rocas sin verlas. <em>Well log</em>. Los archivos estándar se llaman LAS.</div>
+    </div>
+    <div class="card">
+      <div class="term">Casing (revestimiento)</div>
+      <div class="def">Tubería de acero que se cementa dentro del pozo para evitar derrumbes y aislar zonas con agua o gas. <em>Casing</em>. Cada etapa del pozo termina con un casing nuevo.</div>
+    </div>
+    <div class="card">
+      <div class="term">Company man</div>
+      <div class="def">El representante del operador (Pemex en este caso) que vive en el equipo y es el responsable final de las decisiones. <em>Company man / drilling supervisor</em>.</div>
+    </div>
+    <div class="card">
+      <div class="term">Pemex</div>
+      <div class="def">Petróleos Mexicanos. La empresa estatal que opera la mayoría de los pozos en México. El cliente final de los servicios de cabina.</div>
+    </div>
+    <div class="card">
+      <div class="term">CNH</div>
+      <div class="def">Comisión Nacional de Hidrocarburos. El regulador mexicano. Define los lineamientos de qué información se entrega y cómo.</div>
+    </div>
+    <div class="card">
+      <div class="term">Litoteca Nacional</div>
+      <div class="def">El archivo nacional de muestras físicas y datos digitales de pozos. Está en Pachuca y Mérida. Custodia cuttings y núcleos de más de 17 000 pozos históricos. Cualquier operador tiene que entregar su información aquí.</div>
+    </div>
+    <div class="card">
+      <div class="term">Masterlog</div>
+      <div class="def">El documento gráfico final que integra todo: profundidad, litología, gas, ROP, eventos. Es el "expediente" del pozo. Se entrega al final.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 ABREVIATURAS ============ -->
+<section id="abrev">
+  <h2><span class="num">02</span>Abreviaturas que vas a escuchar</h2>
+  <p class="lead">La industria usa siglas para todo. Esta es la lista corta de las que vas a ver escritas en cualquier reporte, conversación o correo.</p>
+  <div class="grid-3">
+    <div class="card"><div class="abbr">SIOP</div><div class="term">Sistema de Información de Operaciones Petroleras</div><div class="def">El reporte diario de operaciones de Pemex. Lo que la cabina entrega cada mañana a las 06:00.</div></div>
+    <div class="card"><div class="abbr">DDR</div><div class="term">Daily Drilling Report</div><div class="def">El equivalente internacional del SIOP. En México y Pemex se llama SIOP.</div></div>
+    <div class="card"><div class="abbr">ROP</div><div class="term">Rate of Penetration</div><div class="def">Velocidad de avance de la broca (m/h).</div></div>
+    <div class="card"><div class="abbr">WOB</div><div class="term">Weight on Bit</div><div class="def">Peso sobre la broca, en toneladas. Controla la eficiencia de corte.</div></div>
+    <div class="card"><div class="abbr">RPM</div><div class="term">Revolutions Per Minute</div><div class="def">Vueltas por minuto de la sarta rotaria.</div></div>
+    <div class="card"><div class="abbr">SPP</div><div class="term">Standpipe Pressure</div><div class="def">Presión en la tubería de perforación, en psi.</div></div>
+    <div class="card"><div class="abbr">ECD</div><div class="term">Equivalent Circulating Density</div><div class="def">Densidad equivalente del lodo mientras circula. Crítica para no fracturar la formación.</div></div>
+    <div class="card"><div class="abbr">GPM</div><div class="term">Gallons Per Minute</div><div class="def">Gasto de bombeo del lodo (galones por minuto).</div></div>
+    <div class="card"><div class="abbr">LWD</div><div class="term">Logging While Drilling</div><div class="def">Registro geofísico que se hace mientras se perfora, con herramientas en la sarta.</div></div>
+    <div class="card"><div class="abbr">MWD</div><div class="term">Measurement While Drilling</div><div class="def">Mediciones (dirección, inclinación, gamma) mientras se perfora.</div></div>
+    <div class="card"><div class="abbr">WITSML</div><div class="term">Wellsite Information Transfer Standard Markup Language</div><div class="def">El estándar internacional para transmitir datos de perforación en tiempo real entre la cabina y las oficinas.</div></div>
+    <div class="card"><div class="abbr">DNV 2.7-1</div><div class="term">Standard for Offshore Containers</div><div class="def">Certificación que garantiza que una cabina aguante ambiente marino (viento, sal, golpes). Obligatoria para offshore.</div></div>
+    <div class="card"><div class="abbr">BHA</div><div class="term">Bottom Hole Assembly</div><div class="def">El conjunto de herramientas al final de la sarta: broca, drill collars, MWD, LWD, motores.</div></div>
+    <div class="card"><div class="abbr">LAS</div><div class="term">Log ASCII Standard</div><div class="def">Formato de archivo estándar para registros geofísicos. Texto plano con curvas a distintas profundidades.</div></div>
+    <div class="card"><div class="abbr">H2S</div><div class="term">Sulfuro de Hidrógeno</div><div class="def">Gas tóxico mortal que puede aparecer en algunas formaciones. Se monitorea con sensores especiales.</div></div>
+    <div class="card"><div class="abbr">NPT</div><div class="term">Non-Productive Time</div><div class="def">Tiempo del equipo que no se usa perforando (por espera, mantenimiento, manifestación). Lo que se busca minimizar.</div></div>
+    <div class="card"><div class="abbr">OAE</div><div class="term">Operadora de Análisis y Estadística</div><div class="def">En el contexto de Pemex, una operadora que presta servicios específicos de análisis. Tu contacto puede ser de una.</div></div>
+    <div class="card"><div class="abbr">PEP</div><div class="term">Pemex Exploración y Producción</div><div class="def">La subsidiaria de Pemex que maneja los pozos. Es quien firma los contratos con las cabinas.</div></div>
+    <div class="card"><div class="abbr">OPEX</div><div class="term">Operación / Operador externo</div><div class="def">En la carpeta de tu proyecto aparece como la compañía operadora. Puede ser una subcontratista que opera la plataforma para Pemex.</div></div>
+    <div class="card"><div class="abbr">IMP</div><div class="term">Instituto Mexicano del Petróleo</div><div class="def">Centro de investigación de Pemex. Maneja la Litoteca Nacional y presta servicios especializados.</div></div>
+  </div>
+</section>
+
+<!-- ============ 03 SERVICIOS ============ -->
+<section id="servicios">
+  <h2><span class="num">03</span>Los 14 servicios, uno por uno</h2>
+  <p class="lead">Esto es el menú completo de lo que hace una cabina geológica. Cada tarjeta tiene el número, el nombre, el equivalente en inglés, qué tipo de trabajo es, qué hace, y dónde lo encontraste en los documentos de tu carpeta.</p>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">1</div>
+      <div class="service-title">
+        <h3>Descripción litológica de cuttings</h3>
+        <div class="en">Lithology description / Cuttings analysis</div>
+        <div class="service-meta">
+          <span class="tag tag-experto">Manual con microscopio</span>
+          <span class="tag tag-manual">Experto</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Cada 5 a 10 metros perforados, el geólogo toma una muestra de cuttings que llegan en las vibradoras (shale shakers), la lava, la seca, la pone bajo el microscopio binocular, y describe: color, tipo de roca (lutita, arenisca, caliza), tamaño de grano, porosidad visible, fluorescentcia bajo luz UV, olor a petróleo.</p>
+    <div class="entrega"><strong>Entregable</strong>Un párrafo descriptivo por cada intervalo (ej: "Lutita gris claro, ligeramente arenosa, semidura y calcárea, con fluorescentcia amarillo claro en 20% de la muestra"). Termina alimentando el masterlog.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>COMPENDIO LITOLOGICO MULACH-12 A 3710 m.pdf</em> y <em>03. Atlas litológico_OAE_Mulach-12.pdf</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">2</div>
+      <div class="service-title">
+        <h3>Cromatografía de gases</h3>
+        <div class="en">Gas chromatography / Mud gas analysis</div>
+        <div class="service-meta">
+          <span class="tag tag-sensor">Sensor + análisis</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Un cromatógrafo instalado en la cabina succiona gas del lodo y lo separa por componentes: metano (C1), etano (C2), propano (C3), butanos (iC4, nC4), pentanos (iC5, nC5). Versiones avanzadas llegan hasta C22 con espectrometría de masas. Cada metro perforado produce una lectura.</p>
+    <div class="entrega"><strong>Entregable</strong>Una tabla con 5 000+ filas: profundidad, gas total, C1, C2, C3, iC4, nC4, iC5, nC5. En tu carpeta: la <em>TABLA CROMATOGRAFIA MULACH-12</em> tiene 5 847 líneas, una por metro de 2 500 a 4 162 m.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>TABLA CROMATOGRAFIA MULACH-12 etapa_8.5.xlsx</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">3</div>
+      <div class="service-title">
+        <h3>Monitoreo de parámetros de perforación</h3>
+        <div class="en">Drilling parameters monitoring</div>
+        <div class="service-meta">
+          <span class="tag tag-sensor">Sensores + cálculo</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Decenas de sensores en el equipo miden cada segundo: peso sobre la broca (WOB), vueltas por minuto (RPM), presión de bomba (SPP), gasto (GPM), densidad de lodo entrada y salida, temperatura, carga del gancho, torque, emboladas. El sistema calcula variables derivadas: ROP, d-exponente, ECD, presión de poro.</p>
+    <div class="entrega"><strong>Entregable</strong>Base de datos con un registro por metro (o por segundo) con 14+ columnas. En tu carpeta: <em>BASE GENERAL MULACH-12.xlsx</em> tiene 3 007 filas con carga del gancho, WOB, RPM, presión, emboladas, gasto, densidades y temperaturas.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>BASE GENERAL MULACH-12 (oficina) a 3330 m.xlsx</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">4</div>
+      <div class="service-title">
+        <h3>Reporte diario de operaciones (SIOP)</h3>
+        <div class="en">Daily drilling report / SIOP / DDR</div>
+        <div class="service-meta">
+          <span class="tag tag-software">Software + manual</span>
+          <span class="tag" style="background:rgba(47,111,94,.15);color:var(--primary)">MVP - Foco 1</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Es el documento central de la cabina. Se entrega cada mañana a las 06:00 con todo lo que pasó en las últimas 24 horas: profundidad inicial y final, metros perforados, ROP, condiciones operativas, sarta corrida, parámetros de lodo, registro de barrena, programa del día siguiente, observaciones, firmas.</p>
+    <div class="entrega"><strong>Entregable</strong>Un PDF firmado por el representante de Pemex (WSC), el de la compañía (OIM), el tool pusher día y noche. En tu carpeta tienes 4 SIOPs distintos (15 y 16 de julio 2022) y el <em>CDO_Matutino</em> (24 julio 2022). Todos con la misma plantilla Pemex.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>SIOP Mulach-12 15.07.2022.pdf</em>, <em>SIOP Mulach-12 16.07.2022.pdf</em>, <em>CDO_Matutino_Mulach 12_Etapa 8.5in.xlsx</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">5</div>
+      <div class="service-title">
+        <h3>Detección y reporte de manifestaciones</h3>
+        <div class="en">Kick detection / Show report</div>
+        <div class="service-meta">
+          <span class="tag tag-software">Manual + alertas</span>
+          <span class="tag" style="background:rgba(47,111,94,.15);color:var(--primary)">MVP - Foco 2</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Monitorea continuamente si entra gas o fluido no controlado al pozo. Cuando los sensores detectan una anomalía (incremento de gas, cambio de densidad, variación de presión), se genera un reporte independiente con la profundidad, lecturas, hora, y respuesta del equipo.</p>
+    <div class="entrega"><strong>Entregable</strong>Un reporte por evento, con la firma del operador y supervisor. En tu carpeta: <em>REPORTE DE MANIFESTACION MULACH-12 No.2.pdf</em> documenta la manifestación del 26/07/2022 a 3 580 m, con incremento de gas a 10 260 ppm sin variar densidad.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>REPORTE DE MANIFESTACION MULACH-12 No.2.pdf</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">6</div>
+      <div class="service-title">
+        <h3>Bioestratigrafía y paleontología</h3>
+        <div class="en">Biostratigraphy / Paleontology</div>
+        <div class="service-meta">
+          <span class="tag tag-experto">Experto + microscopio</span>
+          <span class="tag tag-manual">Manual</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Un paleontólogo analiza los microfósiles (foraminíferos, nanoplancton, polen) en los cuttings para fechar las rocas con precisión. Cada especie aparece o desaparece en una época geológica específica, así que encontrar una especie determina la edad de la formación. Permite correlacionar el pozo con otros pozos del campo.</p>
+    <div class="entrega"><strong>Entregable</strong>Una tabla de edad por profundidad + el reporte paleontológico final. En tu carpeta: el <em>Reporte paleontológico_Mulach-12</em> (11.4 MB) y la hoja <em>FOSILES INDICES</em> con la tabla de referencia (Globorotalia, Globigerinoides, Sphaerodinellopsis).</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>Reporte paleontologico_Mulach-12.pdf</em>, <em>Boleta Diaria - FOSILES INDICES</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">7</div>
+      <div class="service-title">
+        <h3>Masterlog gráfico integrador</h3>
+        <div class="en">Composite log / Masterlog</div>
+        <div class="service-meta">
+          <span class="tag tag-software">Software + impresión</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Es el documento gráfico final que junta todas las curvas y columnas del pozo: profundidad, litología, gas, ROP, eventos, casing, surveys, barrena, paleontología. Se imprime en un pliego largo (a veces 5+ metros) y se entrega al final. Es el "expediente" del pozo.</p>
+    <div class="entrega"><strong>Entregable</strong>Un PDF de gran formato con todas las curvas del pozo, dividido por etapas. En tu carpeta: <em>Masterlog Parametros_OAE_Mulach_12.pdf</em> y las secciones por etapa (12.25", 8.5").</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>Masterlog Parametros_OAE_Mulach_12.pdf</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">8</div>
+      <div class="service-title">
+        <h3>Survey direccional</h3>
+        <div class="en">Directional survey</div>
+        <div class="service-meta">
+          <span class="tag tag-sensor">Sensor + cálculo</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Mide la inclinación y el azimut del pozo cada cierta distancia perforada. Con eso se calcula la posición real (TVD, NS, EW) y la trayectoria. Los pozos modernos son direccionales o horizontales, no verticales.</p>
+    <div class="entrega"><strong>Entregable</strong>Tabla con MD (profundidad medida), inclinación, azimut, TVD, NS, EW, DLS (severidad). En tu carpeta: <em>Mulach 12 Etapa 12.25plg Survey a 3073.75m.xlsx</em>.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>Mulach 12 Etapa 12.25plg Survey.xlsx</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">9</div>
+      <div class="service-title">
+        <h3>Geosteering en tiempo real</h3>
+        <div class="en">Geosteering / Well placement</div>
+        <div class="service-meta">
+          <span class="tag tag-software">Software + LWD</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> En pozos horizontales, guía la broca para que se mantenga dentro de la zona productiva (el "sweet spot"). El geosteerer ve en tiempo real los datos de resistividad y gamma del LWD y le dice al directional driller si subir, bajar o seguir.</p>
+    <div class="entrega"><strong>Entregable</strong>Modelo de geosteering con la trayectoria interpretada, distancia a los topes de formación, y comandos al driller. En México lo opera ROGII con su software StarSteer.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      No en tu carpeta (estos pozos son verticales/direccionales someros, no horizontales)
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">10</div>
+      <div class="service-title">
+        <h3>Geomecánica y estabilidad de pozo</h3>
+        <div class="en">Geomechanics / Wellbore stability</div>
+        <div class="service-meta">
+          <span class="tag tag-experto">Experto + modelo</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Predice si la roca se va a derrumbar o si se va a fracturar. Calcula la presión de poro (qué tan alta es la presión de los fluidos dentro de la roca) y la presión de fractura (cuánto aguanta antes de romperse). Con eso define la "ventana de lodo" — el rango de densidades seguras para perforar.</p>
+    <div class="entrega"><strong>Entregable</strong>Modelo mecánico 1D (MEM) con curvas de presión de poro, fractura, y densidad equivalente segura. En tu carpeta: <em>FORMATO DE DERRUMBES MULACH-12.pdf</em> documenta un derrumbe de lutita a 3 210-3 217 m.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>FORMATO DE DERRUMBES MULACH-12.pdf</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">11</div>
+      <div class="service-title">
+        <h3>Petrografía y descripción de núcleo</h3>
+        <div class="en">Petrography / Core description</div>
+        <div class="service-meta">
+          <span class="tag tag-experto">Experto + laboratorio</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Cuando se decide cortar núcleo (un cilindro de roca de 10-30 m de largo que se extrae del pozo), el geólogo de núcleo describe en detalle cada centímetro: litología, textura, minerales, porosidad, permeabilidad, fluorescentcia, fracturas. Es la "verdad" de qué hay en el subsuelo.</p>
+    <div class="entrega"><strong>Entregable</strong>Reporte de núcleo con descripción metro a metro, fotos de alta resolución, análisis de laboratorio (porosidad, permeabilidad). En tu carpeta: <em>REPORTE DE NUCLEO BARRIL 1 3291-3300.pdf</em>.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>REPORTE DE NUCLEO BARRIL 1 3291-3300.pdf</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">12</div>
+      <div class="service-title">
+        <h3>Lookahead y planeación operativa</h3>
+        <div class="en">Lookahead / Operations planning</div>
+        <div class="service-meta">
+          <span class="tag tag-software">Manual + datos</span>
+          <span class="tag" style="background:rgba(47,111,94,.15);color:var(--primary)">MVP - Foco 3</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Planea las próximas 24 a 72 horas de operación: qué herramienta bajar, a qué profundidad, qué maniobra hacer, qué herramientas especiales se necesitan. Coordina con el equipo de perforación, con proveedores, con logística.</p>
+    <div class="entrega"><strong>Entregable</strong>Una tabla día por día con las tareas y responsables. En tu carpeta: <em>Pokche 12-Lookahead 29.07.2022.pdf</em> muestra 7 días de planeación detallada.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Lo viste en: <em>Pokche 12-Lookahead 29.07.2022.pdf</em>
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">13</div>
+      <div class="service-title">
+        <h3>Informe final del pozo (EOW)</h3>
+        <div class="en">End of Well report</div>
+        <div class="service-meta">
+          <span class="tag tag-software">Manual + software</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> Es el documento que cierra el pozo. Resume toda la geología atravesada, los resultados, los problemas, las recomendaciones para pozos vecinos. Se entrega a Pemex al terminar la perforación y alimenta la Litoteca Nacional.</p>
+    <div class="entrega"><strong>Entregable</strong>Un PDF de 50-200 páginas con texto, gráficos, tablas, apéndices. Típicamente se entrega 30-60 días después de terminar el pozo.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      No aparece en tu carpeta (Mulach-12 estaba aún en perforación)
+    </div>
+  </div>
+
+  <div class="service">
+    <div class="service-head">
+      <div class="service-num">14</div>
+      <div class="service-title">
+        <h3>Digitalización de archivos históricos</h3>
+        <div class="en">Archive digitization</div>
+        <div class="service-meta">
+          <span class="tag tag-software">OCR + LLM</span>
+          <span class="tag" style="background:rgba(201,123,63,.15);color:var(--accent)">Oportunidad grande</span>
+        </div>
+      </div>
+    </div>
+    <p class="does"><strong>Qué hace:</strong> La Litoteca Nacional tiene 17 000+ pozos históricos, muchos con reportes en papel o PDF escaneado sin OCR. Convertir esos archivos a datos estructurados (CSV, bases de datos) es un mercado enorme. El regulador CNH ya exige entrega de información digital en 30 días.</p>
+    <div class="entrega"><strong>Entregable</strong>PDFs antiguos convertidos a CSV/LAS con metadatos extraídos (pozo, fecha, profundidad, litología). Es lo que hace <em>LogDog.ai</em> en minería y <em>Litoteca Nacional</em> está pidiendo.</div>
+    <div class="donde">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Mercado paralelo: <em>Litoteca Nacional CNH/SENER</em>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 MVP ============ -->
+<section id="mvp">
+  <h2><span class="num">04</span>Qué hace el MVP (alcance)</h2>
+  <p class="lead">El MVP automatiza los 3 servicios marcados arriba como <em>MVP - Foco</em>, más el digitalizador. Lo demás queda fuera de v1 pero ya está mapeado para v2.</p>
+
+  <div class="roi-box">
+    <div class="lbl">El MVP automatiza 4 de los 14 servicios</div>
+    <div class="roi-grid">
+      <div class="roi-cell"><div class="v">#4</div><div class="l">Reporte diario SIOP</div></div>
+      <div class="roi-cell"><div class="v">#5</div><div class="l">Reporte de manifestaciones</div></div>
+      <div class="roi-cell"><div class="v">#12</div><div class="l">Lookahead operativo</div></div>
+      <div class="roi-cell"><div class="v">#14</div><div class="l">Digitalizador de archivos</div></div>
+    </div>
+  </div>
+
+  <h3>Lo que SÍ hace el MVP</h3>
+  <ul>
+    <li><strong>Ingerir</strong> CSV diarios del cliente (base de parámetros, cromatografía, survey, profundidad) y convertirlos al formato interno.</li>
+    <li><strong>Validar</strong> coherencia: profundidad monotónica, gastos en rango, densidades plausibles, etc. Marca rojos los huecos.</li>
+    <li><strong>Calcular</strong> indicadores del día: metros perforados, ROP promedio, máximo de gas, % manifestaciones, eficiencia de la barrena.</li>
+    <li><strong>Generar prosa</strong> estilo Pemex para el resumen ejecutivo del SIOP, usando un LLM con plantillas validadas.</li>
+    <li><strong>Llenar</strong> la plantilla del SIOP y del Reporte Diario en PDF y Excel, idéntica a la que usa el cliente.</li>
+    <li><strong>Detectar</strong> manifestaciones por reglas (gas > 5x background + densidad estable, etc.) y disparar la plantilla de Reporte de Manifestación.</li>
+    <li><strong>Proponer</strong> el lookahead de 24-72h con base en el programa del operador + los datos del día.</li>
+    <li><strong>Exportar</strong> todo el resultado en PDF y XLSX listos para que el geólogo revise y firme.</li>
+  </ul>
+
+  <h3>Lo que NO hace el MVP (queda para v2)</h3>
+  <ul>
+    <li>No describe litología de cuttings bajo el microscopio (servicio #1). Eso requiere visión por computadora y un modelo entrenado en litología mexicana — v2.</li>
+    <li>No interpreta paleontología (servicio #6). Requiere paleontólogo y no se automatiza pronto.</li>
+    <li>No hace el masterlog gráfico (servicio #7). Requiere software especializado de plotting (Litholog de SLB, Geo-Draft, etc.).</li>
+    <li>No hace geosteering (servicio #9). Ya hay software especializado de ROGII.</li>
+    <li>No reemplaza al geólogo de cabina. El humano siempre valida y firma.</li>
+  </ul>
+</section>
+
+<!-- ============ 05 ARQUITECTURA ============ -->
+<section id="arq">
+  <h2><span class="num">05</span>Arquitectura técnica</h2>
+  <p class="lead">Cómo se conectan las piezas. Tres capas: <strong>entrada</strong> (lo que ya captura la cabina), <strong>cerebro</strong> (lo que vamos a construir), <strong>salida</strong> (lo que recibe el cliente).</p>
+
+  <div class="arch">
+<svg viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg" style="font-family:'Outfit',sans-serif">
+  <!-- Capas de fondo -->
+  <rect x="0" y="20" width="800" height="120" fill="#f0ebde" rx="8"/>
+  <rect x="0" y="160" width="800" height="180" fill="#e9e3d6" rx="8"/>
+  <rect x="0" y="360" width="800" height="100" fill="#f0ebde" rx="8"/>
+
+  <!-- Etiquetas de capa -->
+  <text x="20" y="40" font-size="11" fill="#7c7a72" letter-spacing="2">CAPA 1 · ENTRADA (lo que ya existe)</text>
+  <text x="20" y="180" font-size="11" fill="#7c7a72" letter-spacing="2">CAPA 2 · CEREBRO (lo que vamos a construir)</text>
+  <text x="20" y="380" font-size="11" fill="#7c7a72" letter-spacing="2">CAPA 3 · SALIDA (lo que recibe el cliente)</text>
+
+  <!-- Entrada -->
+  <rect x="40" y="60" width="150" height="60" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="115" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">CSV de cabina</text>
+  <text x="115" y="100" text-anchor="middle" font-size="11" fill="#7c7a72">Base general, croma, survey</text>
+
+  <rect x="220" y="60" width="150" height="60" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="295" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">WITSML</text>
+  <text x="295" y="100" text-anchor="middle" font-size="11" fill="#7c7a72">Tiempo real del equipo</text>
+
+  <rect x="400" y="60" width="150" height="60" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="475" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">PDFs escaneados</text>
+  <text x="475" y="100" text-anchor="middle" font-size="11" fill="#7c7a72">Histórico (digitalizar)</text>
+
+  <rect x="580" y="60" width="180" height="60" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="670" y="82" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">Templates Pemex</text>
+  <text x="670" y="100" text-anchor="middle" font-size="11" fill="#7c7a72">SIOP, REPORTE, Lookahead</text>
+
+  <!-- Flechas hacia cerebro -->
+  <path d="M115 120 L115 200" stroke="#2f6f5e" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <path d="M295 120 L295 200" stroke="#2f6f5e" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <path d="M475 120 L475 200" stroke="#2f6f5e" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <path d="M670 120 L670 200" stroke="#2f6f5e" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+  <!-- Cerebro - 4 módulos -->
+  <rect x="40" y="200" width="170" height="120" fill="#fff" stroke="#c97b3f" stroke-width="2" rx="8"/>
+  <text x="125" y="222" text-anchor="middle" font-size="13" font-weight="600" fill="#c97b3f">Módulo 1</text>
+  <text x="125" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">Ingesta y validación</text>
+  <text x="125" y="266" text-anchor="middle" font-size="11" fill="#7c7a72">Normaliza, valida,</text>
+  <text x="125" y="282" text-anchor="middle" font-size="11" fill="#7c7a72">marca errores</text>
+  <text x="125" y="304" text-anchor="middle" font-size="10" fill="#7c7a72" font-style="italic">Python + pandas</text>
+
+  <rect x="230" y="200" width="170" height="120" fill="#fff" stroke="#c97b3f" stroke-width="2" rx="8"/>
+  <text x="315" y="222" text-anchor="middle" font-size="13" font-weight="600" fill="#c97b3f">Módulo 2</text>
+  <text x="315" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">Genera reportes</text>
+  <text x="315" y="266" text-anchor="middle" font-size="11" fill="#7c7a72">SIOP, Reporte diario,</text>
+  <text x="315" y="282" text-anchor="middle" font-size="11" fill="#7c7a72">Manifestación</text>
+  <text x="315" y="304" text-anchor="middle" font-size="10" fill="#7c7a72" font-style="italic">LLM (GPT-4 / Claude)</text>
+
+  <rect x="420" y="200" width="170" height="120" fill="#fff" stroke="#c97b3f" stroke-width="2" rx="8"/>
+  <text x="505" y="222" text-anchor="middle" font-size="13" font-weight="600" fill="#c97b3f">Módulo 3</text>
+  <text x="505" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">Lookahead</text>
+  <text x="505" y="266" text-anchor="middle" font-size="11" fill="#7c7a72">Prox 24-72h, alertas,</text>
+  <text x="505" y="282" text-anchor="middle" font-size="11" fill="#7c7a72">manifestaciones</text>
+  <text x="505" y="304" text-anchor="middle" font-size="10" fill="#7c7a72" font-style="italic">Reglas + LLM</text>
+
+  <rect x="610" y="200" width="150" height="120" fill="#fff" stroke="#c97b3f" stroke-width="2" rx="8"/>
+  <text x="685" y="222" text-anchor="middle" font-size="13" font-weight="600" fill="#c97b3f">Módulo 4</text>
+  <text x="685" y="244" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">OCR histórico</text>
+  <text x="685" y="266" text-anchor="middle" font-size="11" fill="#7c7a72">PDFs a CSV,</text>
+  <text x="685" y="282" text-anchor="middle" font-size="11" fill="#7c7a72">Litoteca</text>
+  <text x="685" y="304" text-anchor="middle" font-size="10" fill="#7c7a72" font-style="italic">OCR + LLM</text>
+
+  <!-- Flechas hacia salida -->
+  <path d="M125 320 L125 400" stroke="#c97b3f" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <path d="M315 320 L315 400" stroke="#c97b3f" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <path d="M505 320 L505 400" stroke="#c97b3f" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+  <path d="M685 320 L685 400" stroke="#c97b3f" stroke-width="1.5" fill="none" marker-end="url(#arr2)"/>
+
+  <!-- Salida -->
+  <rect x="40" y="400" width="170" height="50" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="125" y="422" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">PDF firmado</text>
+  <text x="125" y="438" text-anchor="middle" font-size="11" fill="#7c7a72">SIOP, Reporte, Manif.</text>
+
+  <rect x="230" y="400" width="170" height="50" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="315" y="422" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">XLSX</text>
+  <text x="315" y="438" text-anchor="middle" font-size="11" fill="#7c7a72">Base de datos</text>
+
+  <rect x="420" y="400" width="170" height="50" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="505" y="422" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">Dashboard</text>
+  <text x="505" y="438" text-anchor="middle" font-size="11" fill="#7c7a72">Alertas en vivo</text>
+
+  <rect x="610" y="400" width="150" height="50" fill="#fff" stroke="#2f6f5e" stroke-width="1.5" rx="6"/>
+  <text x="685" y="422" text-anchor="middle" font-size="13" font-weight="600" fill="#14171e">CSV estructurado</text>
+  <text x="685" y="438" text-anchor="middle" font-size="11" fill="#7c7a72">Litoteca</text>
+
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0 0 L8 4 L0 8 Z" fill="#2f6f5e"/>
+    </marker>
+    <marker id="arr2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0 0 L8 4 L0 8 Z" fill="#c97b3f"/>
+    </marker>
+  </defs>
+</svg>
+  </div>
+
+  <h3>El flujo en una frase</h3>
+  <p>El operador de cabina carga los datos crudos del día (o el sistema los recibe por WITSML), el sistema los valida y normaliza, calcula indicadores, redacta el reporte en lenguaje Pemex, llena la plantilla oficial, y entrega el PDF listo para que el geólogo revise y firme.</p>
+</section>
+
+<!-- ============ 06 STACK ============ -->
+<section id="stack">
+  <h2><span class="num">06</span>Stack tecnológico</h2>
+  <p class="lead">Lo que corre por debajo. Cada decisión está justificada por el tipo de problema.</p>
+
+  <div class="stack-row">
+    <div class="stack-cell">
+      <h4>Lenguaje</h4>
+      <div class="stack-desc">Para los pipelines de datos.</div>
+      <ul><li>Python 3.12+</li><li>TypeScript para el dashboard</li></ul>
+    </div>
+    <div class="stack-cell">
+      <h4>Datos</h4>
+      <div class="stack-desc">Almacenamiento y consultas.</div>
+      <ul><li>PostgreSQL</li><li>TimescaleDB para series de tiempo</li><li>Parquet para histórico</li></ul>
+    </div>
+    <div class="stack-cell">
+      <h4>LLM</h4>
+      <div class="stack-desc">Generación de prosa y OCR.</div>
+      <ul><li>OpenAI GPT-4 Turbo</li><li>Anthropic Claude 3.5</li><li>Llama 3.1 70B (on-prem)</li></ul>
+    </div>
+    <div class="stack-cell">
+      <h4>OCR</h4>
+      <div class="stack-desc">Para digitalizar archivos históricos.</div>
+      <ul><li>Azure Document Intelligence</li><li>Google Document AI</li><li>Tesseract (open source)</li></ul>
+    </div>
+    <div class="stack-cell">
+      <h4>Backend</h4>
+      <div class="stack-desc">API y procesamiento.</div>
+      <ul><li>FastAPI (Python)</li><li>Celery + Redis (jobs)</li><li>Docker / Kubernetes</li></ul>
+    </div>
+    <div class="stack-cell">
+      <h4>Frontend</h4>
+      <div class="stack-desc">Lo que ve el usuario.</div>
+      <ul><li>Next.js 15</li><li>React + Tailwind</li><li>shadcn/ui</li></ul>
+    </div>
+    <div class="stack-cell">
+      <h4>Infraestructura</h4>
+      <div class="stack-desc">Dónde corre.</div>
+      <ul><li>AWS México (us-east-1)</li><li>Cloudflare CDN</li><li>Sentry para errores</li></ul>
+    </div>
+    <div class="stack-cell">
+      <h4>Seguridad</h4>
+      <div class="stack-desc">Lo que el cliente exige.</div>
+      <ul><li>SOC 2 Type II</li><li>Multi-tenant aislado</li><li>Cifrado en reposo y tránsito</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 ROADMAP ============ -->
+<section id="roadmap">
+  <h2><span class="num">07</span>Roadmap de 6 meses</h2>
+  <p class="lead">Tres fases, cada una con entregable verificable. Rubén puede parar en cualquier fase si el piloto no convence.</p>
+
+  <div class="roadmap">
+    <div class="rm-item f1">
+      <h4>Fase 1 · Piloto técnico (mes 1-2)</h4>
+      <span class="dur">8 semanas</span>
+      <p>Construir el Módulo 2 (generación de reportes) y correrlo en modo sombra sobre los datos históricos de Mulach-12. Comparar el SIOP generado contra el SIOP real del operador. Métrica de éxito: ≥85% de campos correctos sin intervención humana.</p>
+      <ul>
+        <li>Semana 1-2: Levantar infraestructura, parsear CSVs del cliente, validar pipeline.</li>
+        <li>Semana 3-4: Primer LLM con templates Pemex. Iterar prompts con un geólogo consultor.</li>
+        <li>Semana 5-6: Generar SIOPs sombra para Mulach-12 etapa 8.5". Medir tasa de campos correctos.</li>
+        <li>Semana 7-8: Demo con el contacto. Decisión: ir a fase 2 o ajustar.</li>
+      </ul>
+    </div>
+
+    <div class="rm-item f2">
+      <h4>Fase 2 · Piloto en cabina real (mes 3-4)</h4>
+      <span class="dur">6-8 semanas</span>
+      <p>Instalar el sistema en una cabina real del cliente. El sistema corre en paralelo a la operación manual durante 30 días. Se miden las 4 métricas del piloto: horas-hombre reducidas, tiempo de entrega del reporte, % campos editados, manifestaciones detectadas.</p>
+      <ul>
+        <li>Implementar Módulo 1 (ingesta) y Módulo 3 (alertas de manifestación).</li>
+        <li>Conectar por WITSML o carga manual de CSVs según tenga el cliente.</li>
+        <li>Geólogo de contraparte del cliente supervisa y firma.</li>
+        <li>Reporte final con ahorro medido, listo para presentar a Pemex.</li>
+      </ul>
+    </div>
+
+    <div class="rm-item f3">
+      <h4>Fase 3 · Comercialización (mes 5-6)</h4>
+      <span class="dur">8 semanas</span>
+      <p>Una vez validado el ahorro, firmar el primer contrato anual. Empezar a prospectar la segunda cabina del mismo cliente. Evaluar Módulo 4 (OCR histórico) según demanda de la Litoteca.</p>
+      <ul>
+        <li>Firma de contrato con la primera cabina (3-12 meses).</li>
+        <li>Identificar 2-3 prospectos adicionales en el Sureste.</li>
+        <li>Empezar a contratar a un segundo cliente del mismo segmento.</li>
+        <li>Roadmap v2 con módulos de litología, geomecánica, masterlog.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 ROI ============ -->
+<section id="roi">
+  <h2><span class="num">08</span>Lo que ahorra el cliente</h2>
+  <p class="lead">Cifras listas para que las pongas en la presentación a tu contacto. Conservadoras — el upside real es mayor.</p>
+
+  <div class="roi-box">
+    <div class="lbl">Por cabina, por mes</div>
+    <div class="roi-grid">
+      <div class="roi-cell"><div class="v">240h</div><div class="l">Horas-hombre/mes liberadas de reportes</div></div>
+      <div class="roi-cell"><div class="v">$103K</div><div class="l">MXN/mes en valor del tiempo liberado</div></div>
+      <div class="roi-cell"><div class="v">$50K</div><div class="l">MXN/mes costo del SaaS</div></div>
+      <div class="roi-cell"><div class="v accent">~2×</div><div class="l">ROI conservador en personal</div></div>
+    </div>
+  </div>
+
+  <h3>Cómo se calculó</h3>
+  <ul>
+    <li><strong>Tamaño típico de cabina Pemex:</strong> 2 geólogos por turno × 2 turnos = 4 geólogos + 2 auxiliares = 4-6 personas.</li>
+    <li><strong>Sueldo geólogo Pemex:</strong> $40,000-$50,000 MXN/mes. Con prestaciones, $55,000-$80,000 MXN/mes cargado.</li>
+    <li><strong>Costo mensual del equipo geológico:</strong> $240,000-$320,000 MXN por cabina.</li>
+    <li><strong>Tiempo dedicado a SIOP + REPORTE + Manifestaciones:</strong> 2-4 horas-hombre por día (benchmark: IDS case study 1-3 h/día).</li>
+    <li><strong>Horas/mes liberadas:</strong> 8 h/día × 30 días = 240 h/mes.</li>
+    <li><strong>Valor del tiempo liberado:</strong> 240 h × $430 MXN/h cargado = $103,200 MXN/mes.</li>
+    <li><strong>Costo SaaS propuesto:</strong> $30,000-$70,000 MXN/mes por cabina. Punto medio: $50,000.</li>
+  </ul>
+
+  <h3>El argumento del NPT evitado (más grande que el personal)</h3>
+  <p>El caso Provectus, publicado en 2025, muestra que un cliente operador con IA sobre DDRs históricos detectó <strong>7% de NPT que no había sido reportado en los DDRs originales</strong>, ahorrando <strong>$4.2 millones de dólares en una campaña de 100 pozos</strong>. Un solo evento así en un año vale 10x el costo del SaaS.</p>
+
+  <blockquote>
+    "El análisis que consumía semanas de leer y clasificar ahora se completa en menos de dos horas. Los ingenieros pasaron de extraer datos a hacer el trabajo que requiere su expertise: interpretar patrones y ajustar planes de pozo."
+    <cite>— VP de Operaciones de Perforación, caso Provectus 2025</cite>
+  </blockquote>
+</section>
+
+<!-- ============ 09 RIESGOS ============ -->
+<section id="riesgos">
+  <h2><span class="num">09</span>Riesgos y cómo se mitigan</h2>
+  <p class="lead">Los tres riesgos que el contacto te va a preguntar. Con respuesta lista.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="term" style="color:var(--warn)">Riesgo 1</div>
+      <h3 style="margin-top:4px">"Y si los datos del cliente están sucios o incompletos"</h3>
+      <p style="font-size:14px;color:var(--ink-2)"><strong>Mitigación:</strong> El sistema NO reemplaza la captura — la cabina sigue capturando con su sistema actual. Tu sistema solo lee el output. Si el CSV viene mal, el reporte sale con un sello rojo de "Datos incompletos en profundidad X–Y" y NO se envía. El geólogo revisa y corrige en el origen.</p>
+    </div>
+    <div class="card">
+      <div class="term" style="color:var(--warn)">Riesgo 2</div>
+      <h3 style="margin-top:4px">"Y si la IA genera algo incorrecto y eso causa una decisión mala"</h3>
+      <p style="font-size:14px;color:var(--ink-2)"><strong>Mitigación:</strong> El Módulo 2 NO interpreta geología, solo formatea datos numéricos en prosa y plantilla. La descripción litológica (servicio #1) la sigue haciendo el geólogo. Tu sistema propone texto solo sobre datos medibles (profundidad, ROP, gas, lodo). La parte subjetiva sigue siendo 100% humana. El Módulo 1 de litología con visión queda para v2.</p>
+    </div>
+    <div class="card">
+      <div class="term" style="color:var(--warn)">Riesgo 3</div>
+      <h3 style="margin-top:4px">"Y si te pasa algo y el servicio se cae"</h3>
+      <p style="font-size:14px;color:var(--ink-2)"><strong>Mitigación en 3 capas:</strong></p>
+      <ol style="font-size:14px;color:var(--ink-2);padding-left:20px;margin:8px 0">
+        <li>Source code en escrow con un tercero (Iron Mountain) — se libera si desapareces más de 30 días.</li>
+        <li>Datos del cliente en su propio tenant, no se mezclan — puede exportar cuando quiera en CSV/PDF.</li>
+        <li>Runbook de 14 días — si desapareces, el equipo del cliente puede operar el sistema en modo manual con sus templates.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="term" style="color:var(--warn)">Riesgo 4 (bonus)</div>
+      <h3 style="margin-top:4px">"Y si Pemex cambia la plantilla del SIOP"</h3>
+      <p style="font-size:14px;color:var(--ink-2)"><strong>Mitigación:</strong> La plantilla del cliente está versionada en el sistema. Cuando Pemex publica un cambio, se carga la nueva versión, se valida con 5+ SIOPs sombra, y se publica a producción. Costo del cambio: ~2 semanas de trabajo. Es un riesgo operacional, no técnico.</p>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:32px">
+    <strong>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Antes de hablar con tu contacto
+    </strong>
+    <p style="margin:8px 0 0">Imprime estas 4 hojas en una sola cara: <strong>(1) los 4 servicios del MVP, (2) el cálculo de ahorro, (3) las dos opciones de alianza, (strong>(4) la apertura sugerida para la reunión</strong>. Con eso llegas a la reunión listo para responder cualquier pregunta técnica o comercial.</p>
+  </div>
+</section>
+
+<footer>
+  Guía del MVP · Cabinas geológicas · Hecho con base en 24 documentos del proyecto Mulach-12 / Pokche-12 y 32 fuentes externas verificadas.<br>
+  Versión para Rubén · Última actualización: septiembre 2026
+</footer>
+
+</div>
+</body>
+</html>
