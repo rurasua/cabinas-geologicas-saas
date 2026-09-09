@@ -7,6 +7,16 @@
 # Datos originales del proyecto OAE (privados de OAE, NO parte del SaaS)
 /2DA QUINCENA DE JULIO 2022/
 
+# Archivos sueltos en la raíz con datos originales OAE (PDFs, XLSXs, etc.)
+# Wildcards por extensión: los únicos archivos del SaaS en la raíz son
+# HTML, MD, JSON, JS, SVG, TXT, así que ningún archivo del SaaS matchea.
+# Re-incluimos el pliego de Pemex que SÍ va al repo.
+/*.pdf
+/*.xlsx
+/*.xls
+/*.las
+!Especificaciones Particulares y Generales B.docx
+
 # Carpeta landing/ residual (huérfana, no se sube)
 # Los archivos del SaaS ya están en la raíz.
 /landing/
