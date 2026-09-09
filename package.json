@@ -1,0 +1,20 @@
+{
+  "name": "cabinas-geologicas-saas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Landing del SaaS Cabinas Geológicas. Sitio estático (HTML/CSS/JS vanilla) servido desde /landing.",
+  "scripts": {
+    "build": "echo 'Sitio estático · no requiere build step'",
+    "dev": "echo 'Abre landing/index.html en tu navegador, o sirve la carpeta con: npx serve landing'",
+    "start": "npx serve landing"
+  },
+  "keywords": [
+    "cabinas-geologicas",
+    "pemex",
+    "witsml",
+    "saas",
+    "static-site"
+  ],
+  "author": "Data-AgenThinkOs",
+  "license": "UNLICENSED"
+}
