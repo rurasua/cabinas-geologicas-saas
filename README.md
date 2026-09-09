@@ -23,36 +23,43 @@ Software para automatizar los reportes operativos de cabinas geológicas en pozo
 
 ```
 .
-├── landing/                              # SaaS web app (single-file HTML)
-│   ├── index.html                        # SPA con hash routing (7 vistas + wizard)
-│   ├── logo.svg                          # Logo corporativo
-│   └── slogan.svg                        # Slogan "The New Generation · Mining & Geology"
+├── index.html                          # SaaS web app (single-file SPA con 7 vistas + wizard)
+├── logo.svg                            # Logo corporativo
+├── slogan.svg                          # Slogan "The New Generation · Mining & Geology"
+├── assets/                             # Assets adicionales del landing
+│   ├── logo.svg
+│   └── slogan.svg
+├── extract.js                          # Helpers de extracción
+├── croma_array.txt                     # Datos de cromatografía embebidos
+├── params_array.txt                    # Datos de parámetros embebidos
 │
-├── witsml-arquitectura/                  # Diseño + código del backend Python
-│   ├── README.md                         # Diseño completo (polling, detección, costo, sprint)
-│   ├── firestore.rules                   # Security rules
-│   ├── firestore.indexes.json            # Índices compuestos
-│   ├── .runtimeconfig.json               # Configuración de Cloud Functions
-│   ├── .env.example                      # Variables de entorno (template)
+├── witsml-arquitectura/                # Diseño + código del backend Python
+│   ├── README.md                       # Diseño completo (polling, detección, costo, sprint)
+│   ├── firestore.rules                 # Security rules
+│   ├── firestore.indexes.json          # Índices compuestos
+│   ├── .runtimeconfig.json             # Configuración de Cloud Functions
+│   ├── .env.example                    # Variables de entorno (template)
 │   └── functions/
-│       ├── main.py                       # 4 Cloud Functions (poll / detect / send / setup)
-│       ├── witsml_client.py              # WitsmlClient class (WITSML 1.4.1 / 2.0)
-│       ├── anomaly_detector.py           # 3 reglas puras (gas, densidad, ROP) + legacy
-│       ├── firestore_schema.py           # Schemas: cabin, datos_realtime, manifestaciones
-│       ├── alerts.py                     # Despacho email/WhatsApp (SMTP + Twilio)
-│       ├── config.py                     # Lee runtimeconfig / env
+│       ├── main.py                     # 4 Cloud Functions (poll / detect / send / setup)
+│       ├── witsml_client.py            # WitsmlClient class (WITSML 1.4.1 / 2.0)
+│       ├── anomaly_detector.py         # 3 reglas puras (gas, densidad, ROP) + legacy
+│       ├── firestore_schema.py         # Schemas: cabin, datos_realtime, manifestaciones
+│       ├── alerts.py                   # Despacho email/WhatsApp (SMTP + Twilio)
+│       ├── config.py                   # Lee runtimeconfig / env
 │       └── tests/
 │           └── test_anomaly_detector.py  # 17 tests
 │
-├── propuesta-alianza-cabinas.html        # Propuesta comercial de alianza (4 hojas)
-├── matriz-cumplimiento-pliego.html       # Matriz de cumplimiento Pliego Pemex ↔ SaaS
-├── guia-mvp-cabinas-geologicas.html      # Manual técnico del MVP (11 secciones)
+├── propuesta-alianza-cabinas.html      # Propuesta comercial de alianza (4 hojas)
+├── matriz-cumplimiento-pliego.html     # Matriz de cumplimiento Pliego Pemex ↔ SaaS
+├── guia-mvp-cabinas-geologicas.html    # Manual técnico del MVP (11 secciones)
 │
 ├── Especificaciones Particulares y Generales B.docx   # Pliego de Pemex (referencia)
 │
-├── CONTEXTO-PROYECTO.md                  # Contexto del proyecto (handoff)
-├── INDICACIONES-WEBAPP.md                # Indicaciones de build de la web app
-└── README.md                             # Este archivo
+├── CONTEXTO-PROYECTO.md                # Contexto del proyecto (handoff)
+├── INDICACIONES-WEBAPP.md              # Indicaciones de build de la web app
+├── package.json                        # Metadata npm (evita warning en Hostinger)
+├── .gitignore
+└── README.md                           # Este archivo
 ```
 
 ---
@@ -63,7 +70,7 @@ Software para automatizar los reportes operativos de cabinas geológicas en pozo
 
 ```powershell
 # Doble click en el archivo, o:
-start C:\projects\Cabinas Geologicas\landing\index.html
+start C:\projects\Cabinas Geologicas\index.html
 ```
 
 No requiere servidor. Todo el JS está embebido y los datos son mock.
@@ -83,15 +90,16 @@ firebase emulators:start --only functions,firestore
 
 ## Deploy
 
-El landing es un sitio estático. Para deployar sin branding inyectado:
+El landing es un sitio estático con `index.html` en la raíz. Funciona en cualquier plataforma sin configuración de build:
 
 | Plataforma | Cómo |
 |---|---|
-| **Cloudflare Pages** | Conectar repo → build command vacío → output dir `landing/` |
-| **Netlify** | `netlify deploy --dir=landing --prod` |
-| **Vercel** | `vercel --prod` apuntando a `landing/` |
+| **Hostinger** | Connect Git → selecciona `cabinas-geologicas-saas` → deja Root dir = `/` → deploy |
+| **Cloudflare Pages** | Connect Git → build command vacío → output dir raíz |
+| **Netlify** | `netlify deploy --dir=. --prod` |
+| **Vercel** | `vercel --prod` desde la raíz |
 
-> **No usar** plataformas que inyectan overlay/branding en sitios servidos (ej. `space.minimax.io`).
+> **No usar** plataformas que inyecten overlay/branding en sitios servidos (ej. `space.minimax.io`).
 
 ---
 

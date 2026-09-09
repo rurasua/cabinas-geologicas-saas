@@ -1,44 +1,21 @@
 # ─────────────────────────────────────────────────────────────────────
 # Cabinas Geológicas SaaS — .gitignore
-# Repo PRIVADO. Estrategia: ignorar TODO en la raíz y re-incluir
-# explícitamente lo que sí va al repo. Así no se cuelan PDFs/XLSXs
-# sueltos con datos originales de OAE.
+# Repo PRIVADO. Protege contra subir datos originales OAE y outputs
+# de deploy regenerables.
 # ─────────────────────────────────────────────────────────────────────
 
-# ── Raíz: ignorar archivos sueltos (los PDFs/XLSXs/DOCXs son de OAE) ──
-/*
-
-# ── Re-incluir lo que SÍ va al repo ──
-# Subdirectorios completos
-!/landing/
-!/landing/**
-!/witsml-arquitectura/
-!/witsml-arquitectura/**
-
-# Archivos de docs del SaaS en la raíz
-!/.gitignore
-!/CONTEXTO-PROYECTO.md
-!/INDICACIONES-WEBAPP.md
-!/README.md
-!/package.json
-!/guia-mvp-cabinas-geologicas.html
-!/matriz-cumplimiento-pliego.html
-!/propuesta-alianza-cabinas.html
-!/Especificaciones Particulares y Generales B.docx
-
-# ── Exclusiones explícitas por si acaso ──
+# Datos originales del proyecto OAE (privados de OAE, NO parte del SaaS)
 /2DA QUINCENA DE JULIO 2022/
 
-# Archivos de datos intermedios con nombres OAE (huérfanos, no se usan en runtime)
-/landing/mulach_croma.txt
-/landing/mulach_data.txt
-/landing/mulach_params.txt
+# Carpeta landing/ residual (huérfana, no se sube)
+# Los archivos del SaaS ya están en la raíz.
+/landing/
 
 # Deploy artifacts (output, regenerables)
 /landing-deploy/
 /matriz-cumplimiento-deploy/
 
-# ── Python ──
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -48,7 +25,7 @@ venv/
 .env.local
 .env.*.local
 
-# ── Editores / OS ──
+# Editores / OS
 .vscode/
 .idea/
 .DS_Store
@@ -56,10 +33,10 @@ Thumbs.db
 *.swp
 *.swo
 
-# ── Local runtime ──
+# Local runtime
 .minimax/
 
-# ── Node (por si más adelante) ──
+# Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
