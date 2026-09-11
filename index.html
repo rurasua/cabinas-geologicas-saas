@@ -108,12 +108,51 @@
   .logout-btn{position:fixed;top:20px;left:20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:.06em;background:rgba(255,255,255,.7);padding:6px 10px;border-radius:6px;border:1px solid var(--line);cursor:pointer;opacity:.6;transition:opacity .2s;z-index:100}
   .logout-btn:hover{opacity:1;background:#fff}
   @media (max-width:780px){
-    .slide{padding:40px 32px}
-    .slide h1{font-size:40px}
-    .slide h2{font-size:32px}
-    .bigquote{font-size:28px}
-    .cards{grid-template-columns:1fr}
-    .login-card{padding:36px 28px}
+    /* Slide: scroll vertical interno, contenido alineado arriba, espacio para nav y logout */
+    .slide{
+      height:100vh;
+      overflow-y:auto;
+      overflow-x:hidden;
+      justify-content:flex-start;
+      align-items:stretch;
+      padding:90px 20px 100px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .slide-inner{max-width:100%}
+    /* Tipografía reducida */
+    .slide h1{font-size:32px;line-height:1.1;margin-bottom:14px}
+    .slide h2{font-size:24px;line-height:1.15;margin-bottom:14px}
+    .slide h3{font-size:17px;margin-bottom:8px}
+    .slide p,.slide li{font-size:13.5px;line-height:1.55}
+    .slide-pre{font-size:10px;margin-bottom:12px;letter-spacing:.14em}
+    .slide-sub{font-size:13px;line-height:1.55}
+    .slide-tag{top:54px;left:20px;font-size:10px}
+    .bigquote{font-size:22px;line-height:1.3}
+    .bigquote-sub{font-size:13px;margin-top:14px}
+    /* Logo y slogan más pequeños */
+    .logo-block img.logo{width:160px}
+    .logo-block img.slogan{width:130px;margin-top:6px}
+    /* Cards apiladas (mantener) */
+    .cards{grid-template-columns:1fr;gap:12px;margin-top:14px}
+    .card{padding:16px 14px;border-radius:10px}
+    .card h3{font-size:15px;margin-bottom:6px}
+    .card p,.card li{font-size:13px;line-height:1.5}
+    .card .card-cta{font-size:11px;margin-top:10px}
+    /* Login más compacto */
+    .login-card{padding:28px 20px;max-width:92%}
+    .login-pre{font-size:11px}
+    .login-title{font-size:22px;margin-bottom:6px}
+    .login-sub{font-size:13px}
+    /* Ocultar hint de teclado */
+    .hint{display:none}
+    /* Nav más pequeño y reposicionado */
+    .nav{padding:6px 10px;gap:8px;bottom:14px}
+    .nav button{width:32px;height:32px;font-size:15px}
+    .nav .counter{font-size:11px;min-width:42px}
+    /* Logout: tamaño más discreto */
+    .logout-btn{font-size:10px;padding:5px 8px;top:14px;left:14px}
+    /* Progress más delgada */
+    .progress{height:2px}
   }
 </style>
 </head>
