@@ -1,53 +1,24 @@
-# ─────────────────────────────────────────────────────────────────────
-# Cabinas Geológicas SaaS — .gitignore
-# Repo PRIVADO. Protege contra subir datos originales OAE y outputs
-# de deploy regenerables.
-# ─────────────────────────────────────────────────────────────────────
+# Logs de tracking (generados por track.php en runtime, no se versionan)
+visitas.log
 
-# Datos originales del proyecto OAE (privados de OAE, NO parte del SaaS)
-/2DA QUINCENA DE JULIO 2022/
+# Archivos confidenciales de OAE/Mulach/Pokche/Gersemi — NUNCA al repo público
+GERSEMI.zip
+GERSEMI_PAGO/
+2DA QUINCENA DE JULIO 2022/
+*OAE*
+*Mulach*
+*Mulach-12*
+*MULACH-12*
+*Pokche*
+*POKCHE*
 
-# Archivos sueltos en la raíz con datos originales OAE (PDFs, XLSXs, etc.)
-# Wildcards por extensión: los únicos archivos del SaaS en la raíz son
-# HTML, MD, JSON, JS, SVG, TXT, así que ningún archivo del SaaS matchea.
-# Re-incluimos el pliego de Pemex que SÍ va al repo.
-/*.pdf
-/*.xlsx
-/*.xls
-/*.las
-!Especificaciones Particulares y Generales B.docx
+# Archivos locales de trabajo (no parte del deploy público)
+landing/
+landing-deploy/
+matriz-cumplimiento-deploy/
+presentacion-cabinas.html
+exploracion-colaboracion-cabinas.html
 
-# Carpeta landing/ residual (huérfana, no se sube)
-# Los archivos del SaaS ya están en la raíz.
-/landing/
-
-# Deploy artifacts (output, regenerables)
-/landing-deploy/
-/matriz-cumplimiento-deploy/
-
-# Python
+# Python cache
 __pycache__/
 *.pyc
-*.pyo
-.venv/
-venv/
-.env
-.env.local
-.env.*.local
-
-# Editores / OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-
-# Local runtime
-.minimax/
-
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*

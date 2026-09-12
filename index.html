@@ -357,6 +357,19 @@
   let lockUntil = 0;
 
   // ==========================================================
+  // Tracker anónimo: registra IP + UA + slide en track.php
+  // (ver archivo visitas.log en el servidor Hostinger)
+  // ==========================================================
+  function track(event, slide) {
+    try {
+      const url = 'track.php?e=' + encodeURIComponent(event || 'open') +
+                  '&s=' + encodeURIComponent(slide || '');
+      // keepalive:true permite que el request se complete aunque la página cambie
+      fetch(url, { method: 'GET', keepalive: true, cache: 'no-store' });
+    } catch (e) { /* silencioso: si falla, no rompe la presentación */ }
+  }
+
+  // ==========================================================
   // Año dinámico en el footer del login
   // ==========================================================
   document.querySelectorAll('.login-foot').forEach(el => {
@@ -412,6 +425,7 @@
     setTimeout(() => {
       login.style.display = 'none';
       deckWrap.classList.add('unlocked');
+      track('open', 'login');
       goTo(0);
     }, 400);
   }
@@ -438,6 +452,7 @@
     prev.disabled = i === 0;
     next.disabled = i === total - 1;
     progress.style.width = `${((i + 1) / total) * 100}%`;
+    track('slide', String(i + 1));
   }
 
   prev.addEventListener('click', () => goTo(current - 1));
